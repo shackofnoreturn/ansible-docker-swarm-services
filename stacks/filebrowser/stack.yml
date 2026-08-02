@@ -1,0 +1,7 @@
+---
+stack_name: filebrowser
+
+compose_file: compose.yml
+
+runtime_directories:
+  - /opt/docker-data/filebrowser

@@ -1,0 +1,9 @@
+---
+- name: Validate Docker Stack
+  hosts: all
+  become: true
+  gather_facts: false
+
+  roles:
+    - docker-services-sync
+    - docker-stack-validate

@@ -1,0 +1,10 @@
+---
+docker_services_repo: "https://github.com/shackofnoreturn/docker-swarm-services.git"
+
+docker_services_root: /opt/services
+
+docker_services_branch_map:
+  production: production
+  testing: testing
+  development: development
+  management: management

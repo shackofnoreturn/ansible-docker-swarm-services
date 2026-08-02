@@ -1,0 +1,7 @@
+---
+- name: Deploy stack
+  community.docker.docker_stack:
+    name: "{{ stack_name }}"
+    compose:
+      - "{{ stack_path }}/{{ stack_definition.compose_file }}"
+  delegate_to: "{{ docker_active_manager }}"

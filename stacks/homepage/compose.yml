@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+
+    volumes:
+      - /opt/docker-data/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    networks:
+      - proxy
+
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.homepage.rule=Host(`home.shackofnoreturn.com`)
+        - traefik.http.services.homepage.loadbalancer.server.port=3000
+
+networks:
+  proxy:
+    external: true

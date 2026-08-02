@@ -1,0 +1,6 @@
+---
+- import_tasks: environment.yml
+
+- import_tasks: managers.yml
+
+- import_tasks: sync.yml

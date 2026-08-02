@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: traefik:v3.5
+
+    command:
+      - "--providers.swarm=true"
+      - "--providers.swarm.exposedbydefault=false"
+      - "--api.dashboard=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.cloudflare.acme.dnschallenge=true"
+      - "--certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.cloudflare.acme.storage=/acme.json"
+
+    ports:
+      - target: 80
+        published: 80
+        mode: host
+
+      - target: 443
+        published: 443
+        mode: host
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/docker-data/traefik/acme.json:/acme.json
+
+    secrets:
+      - cloudflare_token
+
+    networks:
+      - proxy
+
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+
+
+secrets:
+  cloudflare_token:
+    external: true
+
+
+networks:
+  proxy:
+    external: true

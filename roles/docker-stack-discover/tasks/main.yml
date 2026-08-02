@@ -1,0 +1,26 @@
+---
+- name: Find stacks
+  find:
+    paths: "{{ stack_root }}"
+    file_type: directory
+    depth: 1
+  register: discovered_stacks
+
+
+- name: Build stack list
+  set_fact:
+    available_stacks: >-
+      {{
+        discovered_stacks.files
+        |
+        map(attribute='path')
+        |
+        map('basename')
+        |
+        list
+      }}
+
+
+- name: Show available stacks
+  debug:
+    var: available_stacks

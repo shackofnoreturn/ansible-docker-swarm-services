@@ -1,0 +1,6 @@
+---
+stack_name: ""
+
+stack_path: "/opt/services/stacks/{{ stack_name }}"
+
+docker_data_root: /opt/docker-data

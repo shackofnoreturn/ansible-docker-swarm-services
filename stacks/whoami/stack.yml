@@ -1,0 +1,4 @@
+---
+stack_name: whoami
+
+compose_file: compose.yml

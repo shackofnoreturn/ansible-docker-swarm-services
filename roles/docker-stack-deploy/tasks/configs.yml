@@ -1,0 +1,16 @@
+---
+- name: Find config files
+  find:
+    paths: "{{ stack_path }}/configs"
+    patterns: "*"
+  register: config_files
+
+
+- name: Create docker configs
+  community.docker.docker_config:
+    name: "{{ stack_name }}_{{ item.path | basename }}"
+    data_src: "{{ item.path }}"
+    state: present
+  loop: "{{ config_files.files }}"
+  when:
+    - config_files.matched > 0

@@ -1,0 +1,27 @@
+---
+- name: Remove docker configs
+  community.docker.docker_config:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ docker_configs_to_remove | default([]) }}"
+  delegate_to: "{{ docker_active_manager }}"
+  when:
+    - remove_configs
+
+
+- name: Remove docker secrets
+  community.docker.docker_secret:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ docker_secrets_to_remove | default([]) }}"
+  delegate_to: "{{ docker_active_manager }}"
+  when:
+    - remove_secrets
+
+
+- name: Remove runtime data
+  file:
+    path: "/opt/docker-data/{{ stack_name }}"
+    state: absent
+  when:
+    - remove_runtime_data

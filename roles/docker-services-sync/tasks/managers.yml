@@ -1,0 +1,28 @@
+---
+- name: Get hosts in environment
+  set_fact:
+    docker_environment_hosts: "{{ groups[docker_environment] }}"
+
+- name: Find active swarm manager
+  command:
+    cmd: docker info --format '{{ "{{.Swarm.ControlAvailable}}" }}'
+  delegate_to: "{{ item }}"
+  register: manager_results
+  changed_when: false
+  ignore_errors: true
+  loop: "{{ docker_environment_hosts }}"
+  run_once: true
+
+- name: Select manager
+  set_fact:
+    docker_active_manager: "{{ item.item }}"
+  when:
+    - docker_active_manager is not defined
+    - item.stdout == "true"
+  loop: "{{ manager_results.results }}"
+  run_once: true
+
+- name: Verify manager found
+  assert:
+    that:
+      - docker_active_manager is defined

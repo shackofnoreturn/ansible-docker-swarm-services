@@ -1,0 +1,30 @@
+---
+- name: Determine environment
+  set_fact:
+    docker_environment: >-
+      {{
+        (
+          group_names
+          |
+          intersect(
+            [
+              'production',
+              'testing',
+              'development',
+              'management'
+            ]
+          )
+        )
+        |
+        first
+      }}
+
+- name: Verify environment
+  assert:
+    that:
+      - docker_environment is defined
+      - docker_environment | length > 0
+
+- name: Determine branch
+  set_fact:
+    docker_git_branch: "{{ docker_services_branch_map[docker_environment] }}"

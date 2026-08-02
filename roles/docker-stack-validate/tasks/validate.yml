@@ -1,0 +1,30 @@
+---
+- name: Check compose file exists
+  stat:
+    path: "{{ stack_path }}/{{ stack_definition.compose_file }}"
+  register: compose_file
+
+
+- name: Validate compose exists
+  assert:
+    that:
+      - compose_file.stat.exists
+    fail_msg:
+      >
+      Missing compose file:
+      {{ stack_definition.compose_file }}
+
+
+- name: Validate runtime directories
+  stat:
+    path: "{{ item }}"
+  loop: "{{ stack_definition.runtime_directories | default([]) }}"
+  register: runtime_checks
+
+
+- name: Display validation result
+  debug:
+    msg:
+      - "Stack: {{ stack_name }}"
+      - "Path: {{ stack_path }}"
+      - "Validation successful"

@@ -1,0 +1,8 @@
+---
+stack_name: ""
+
+remove_runtime_data: false
+remove_configs: true
+remove_secrets: true
+
+stack_path: "/opt/services/stacks/{{ stack_name }}"

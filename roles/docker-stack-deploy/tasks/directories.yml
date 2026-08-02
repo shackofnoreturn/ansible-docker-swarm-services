@@ -1,0 +1,9 @@
+---
+- name: Create application data directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ stack_definition.runtime_directories | default([]) }}"

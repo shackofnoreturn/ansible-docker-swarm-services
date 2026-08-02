@@ -1,0 +1,8 @@
+---
+stack_name: jellyfin
+
+compose_file: compose.yml
+
+runtime_directories:
+  - /opt/docker-data/jellyfin/config
+  - /opt/docker-data/jellyfin/cache

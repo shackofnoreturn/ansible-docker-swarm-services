@@ -1,0 +1,3 @@
+---
+stack_name: ""
+stack_path: "/opt/services/stacks/{{ stack_name }}"
