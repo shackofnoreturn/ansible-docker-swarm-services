@@ -2,14 +2,12 @@
 - name: Stack list
   command:
     cmd: docker stack ls
-  delegate_to: "{{ docker_active_manager }}"
   register: stack_list
 
 
 - name: Stack services
   command:
     cmd: docker stack services {{ stack_name }}
-  delegate_to: "{{ docker_active_manager }}"
   register: stack_services
 
 

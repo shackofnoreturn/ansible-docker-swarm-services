@@ -1,6 +1,6 @@
 ---
 - name: Stack Status
-  hosts: all
+  hosts: managers
   become: true
   gather_facts: false
 
