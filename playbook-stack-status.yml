@@ -1,0 +1,8 @@
+---
+- name: Stack Status
+  hosts: all
+  become: true
+  gather_facts: false
+
+  roles:
+    - docker-stack-status
