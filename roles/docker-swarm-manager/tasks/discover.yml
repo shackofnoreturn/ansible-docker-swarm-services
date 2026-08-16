@@ -6,13 +6,10 @@
     state: started
     timeout: "{{ docker_swarm_manager_ssh_timeout }}"
     connect_timeout: "{{ docker_swarm_manager_probe_timeout }}"
-  loop: "{{ docker_swarm_manager_candidates }}"
+  loop: "{{ hostvars['localhost'].docker_swarm_manager_candidates }}"
   register: docker_manager_ssh_checks
-  delegate_to: localhost
-  become: false
   changed_when: false
   failed_when: false
-
 
 - name: Build reachable manager list
   ansible.builtin.set_fact:
@@ -23,17 +20,16 @@
         | map(attribute='item')
         | list
       }}
+  delegate_to: localhost
+  delegate_facts: true
 
-
-- name: Show skipped managers
+- name: Report unreachable managers
   ansible.builtin.debug:
-    msg: >-
-      Skipping {{ item.item }} because SSH is unreachable.
+    msg: "Skipping unreachable manager: {{ item.item }}"
   loop: "{{ docker_manager_ssh_checks.results }}"
-  when: item.failed | default(false)
+  when:
+    - item.failed | default(false)
 
-
-# FIXME Immense errors for absent nodes
 - name: Check Docker Swarm manager status
   ansible.builtin.command:
     cmd: docker info --format '{{ "{{.Swarm.ControlAvailable}}" }}'
@@ -41,10 +37,9 @@
   register: docker_swarm_manager_checks
   changed_when: false
   failed_when: false
-  loop: "{{ docker_reachable_managers }}"
+  loop: "{{ hostvars['localhost'].docker_reachable_managers }}"
 
-
-- name: Build active manager list
+- name: Build available manager list
   ansible.builtin.set_fact:
     docker_available_managers: >-
       {{
@@ -54,13 +49,14 @@
         | map(attribute='item')
         | list
       }}
+  delegate_to: localhost
+  delegate_facts: true
 
-
-# FIXME What's the use?
-- name: Show non-manager hosts
+- name: Report reachable non-manager hosts
   ansible.builtin.debug:
     msg: >-
-      {{ item.item }} is reachable but is not currently a Swarm manager.
+      {{ item.item }} is reachable but is not currently a
+      Docker Swarm manager.
   loop: "{{ docker_swarm_manager_checks.results }}"
   when:
     - item.rc | default(1) == 0

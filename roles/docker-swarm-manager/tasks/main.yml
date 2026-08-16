@@ -1,52 +1,84 @@
 ---
-- name: Determine environment
+- name: Determine target environment
   ansible.builtin.set_fact:
     docker_environment: >-
       {{
-        group_names
+        ansible_play_hosts_all
+        | map('extract', hostvars)
+        | map(attribute='group_names')
+        | flatten
         | intersect(docker_swarm_manager_environment_groups)
+        | unique
         | first
       }}
+  delegate_to: localhost
+  delegate_facts: true
   run_once: true
 
-
-- name: Validate environment
+- name: Validate target environment
   ansible.builtin.assert:
     that:
-      - docker_environment is defined
-      - docker_environment | length > 0
+      - hostvars['localhost'].docker_environment is defined
+      - hostvars['localhost'].docker_environment | length > 0
     fail_msg: >-
-      Could not determine the Docker environment.
-      Expected one of:
-      {{ docker_swarm_manager_environment_groups | join(', ') }}
+      Could not determine the Docker environment from the hosts
+      targeted by this play.
+  delegate_to: localhost
   run_once: true
-
 
 - name: Determine manager candidates
   ansible.builtin.set_fact:
     docker_swarm_manager_candidates: >-
       {{
         groups['managers']
-        | intersect(groups[docker_environment])
+        | intersect(
+            groups[hostvars['localhost'].docker_environment]
+          )
       }}
+  delegate_to: localhost
+  delegate_facts: true
   run_once: true
-
 
 - name: Validate manager candidates
   ansible.builtin.assert:
     that:
-      - docker_swarm_manager_candidates | length > 0
+      - hostvars['localhost'].docker_swarm_manager_candidates | length > 0
     fail_msg: >-
       No manager candidates found for environment
-      '{{ docker_environment }}'.
+      '{{ hostvars['localhost'].docker_environment }}'.
+  delegate_to: localhost
   run_once: true
-
 
 - name: Discover reachable managers
   ansible.builtin.include_tasks: discover.yml
+  delegate_to: localhost
   run_once: true
 
-
-- name: Select manager
+- name: Select deployment manager
   ansible.builtin.include_tasks: select.yml
+  delegate_to: localhost
   run_once: true
+
+- name: Share environment with all hosts
+  ansible.builtin.set_fact:
+    docker_environment: "{{ hostvars['localhost'].docker_environment }}"
+
+- name: Share manager candidates with all hosts
+  ansible.builtin.set_fact:
+    docker_swarm_manager_candidates: >-
+      {{ hostvars['localhost'].docker_swarm_manager_candidates }}
+
+- name: Share reachable managers with all hosts
+  ansible.builtin.set_fact:
+    docker_reachable_managers: >-
+      {{ hostvars['localhost'].docker_reachable_managers }}
+
+- name: Share available managers with all hosts
+  ansible.builtin.set_fact:
+    docker_available_managers: >-
+      {{ hostvars['localhost'].docker_available_managers }}
+
+- name: Share selected deployment manager with all hosts
+  ansible.builtin.set_fact:
+    docker_deploy_manager: >-
+      {{ hostvars['localhost'].docker_deploy_manager }}

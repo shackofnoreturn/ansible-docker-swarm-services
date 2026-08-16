@@ -1,8 +1,6 @@
 ---
 docker_swarm_manager_ssh_port: 22
-
 docker_swarm_manager_ssh_timeout: 2
-
 docker_swarm_manager_probe_timeout: 5
 
 docker_swarm_manager_environment_groups:
