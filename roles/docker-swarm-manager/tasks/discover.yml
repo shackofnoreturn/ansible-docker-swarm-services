@@ -1,7 +1,7 @@
 ---
-- name: Check Docker Swarm state on manager candidates
+- name: Check Docker Swarm manager candidates
   ansible.builtin.command:
-    cmd: docker info --format json
+    cmd: docker node ls --format '{{.Hostname}}'
   delegate_to: "{{ item }}"
   loop: "{{ docker_swarm_manager_candidates }}"
   loop_control:
@@ -11,9 +11,9 @@
   failed_when: false
   ignore_unreachable: true
 
-- name: DEBUG
+- name: Debug manager checks
   ansible.builtin.debug:
-    var: docker_swarm_manager_checks
+    var: docker_swarm_manager_checks.results
 
 - name: Build available manager list
   ansible.builtin.set_fact:
@@ -22,9 +22,6 @@
         docker_swarm_manager_checks.results
         | selectattr('unreachable', 'undefined')
         | selectattr('rc', 'equalto', 0)
-        | selectattr('stdout', 'defined')
-        | selectattr('stdout', 'ne', '')
-        | selectattr('stdout', 'search', '"ControlAvailable"')
         | map(attribute='item')
         | list
       }}
@@ -38,12 +35,10 @@
   when:
     - item.unreachable is defined
 
-- name: Report Docker query failures
+- name: Report non-manager nodes
   ansible.builtin.debug:
     msg: >-
-      Could not query Docker on {{ item.item }}.
-      Return code: {{ item.rc | default('unknown') }}
-      Error: {{ item.msg | default('unknown') }}
+      {{ item.item }} is reachable but is not a Docker Swarm manager.
   loop: "{{ docker_swarm_manager_checks.results }}"
   loop_control:
     label: "{{ item.item }}"
