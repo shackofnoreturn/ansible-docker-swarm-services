@@ -58,6 +58,14 @@
         | list
       }}
 
+
+
+- name: DEBUG
+  ansible.builtin.debug:
+    msg: "{{ docker_available_managers }}"
+  
+
+
 - name: Report reachable non-managers
   ansible.builtin.debug:
     msg: "{{ item.item }} is reachable but is not a Swarm manager."
