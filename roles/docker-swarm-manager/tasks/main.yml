@@ -1,14 +1,4 @@
 ---
-- name: Validate target environment
-  ansible.builtin.assert:
-    that:
-      - docker_environment is defined
-      - docker_environment | length > 0
-      - docker_environment in docker_swarm_manager_environment_groups
-    fail_msg: >-
-      docker_environment must be one of:
-      {{ docker_swarm_manager_environment_groups | join(', ') }}
-
 - name: Determine manager candidates
   ansible.builtin.set_fact:
     docker_swarm_manager_candidates: >-
@@ -16,25 +6,30 @@
         groups['managers']
         | intersect(groups[docker_environment])
       }}
+  run_once: true
 
 - name: Validate manager candidates
   ansible.builtin.assert:
     that:
       - docker_swarm_manager_candidates | length > 0
     fail_msg: >-
-      No Docker Swarm manager candidates found for
-      environment '{{ docker_environment }}'.
+      No manager candidates found for environment
+      '{{ docker_environment }}'.
+  run_once: true
 
-- name: Initialize manager lists
-  ansible.builtin.set_fact:
-    docker_reachable_managers: []
-    docker_available_managers: []
-    docker_deploy_manager: ""
-
-- name: Discover reachable managers
+- name: Check manager candidates
   ansible.builtin.include_tasks:
     file: discover.yml
+  when:
+    - inventory_hostname in docker_swarm_manager_candidates
 
-- name: Select deployment manager
-  ansible.builtin.include_tasks:
-    file: select.yml
+- name: Build reachable manager list
+  ansible.builtin.set_fact:
+    docker_available_managers: >-
+      {{
+        docker_swarm_manager_candidates
+        | select('in', ansible_play_hosts)
+        | select('match', '.*')
+        | list
+      }}
+  run_once: true

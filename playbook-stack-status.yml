@@ -1,16 +1,68 @@
 ---
-- name: Discover Docker Swarm manager
+- name: Check Docker Swarm managers
+  hosts: "{{ docker_environment }}"
+  gather_facts: false
+
+  tasks:
+
+    - name: Check Docker Swarm manager status
+      ansible.builtin.command:
+        cmd: /usr/bin/docker node ls
+      register: docker_swarm_manager_check
+      changed_when: false
+      failed_when: false
+      ignore_unreachable: true
+
+    - name: Mark Docker manager status
+      ansible.builtin.set_fact:
+        docker_is_available_manager: >-
+          {{
+            docker_swarm_manager_check.unreachable is not defined
+            and docker_swarm_manager_check.rc == 0
+          }}
+
+
+- name: Select Docker Swarm manager
   hosts: localhost
-  connection: local
   gather_facts: false
 
-  roles:
-    - docker-swarm-manager
+  tasks:
 
+    - name: Determine manager candidates
+      ansible.builtin.set_fact:
+        docker_swarm_manager_candidates: >-
+          {{
+            groups['managers']
+            | intersect(groups[docker_environment])
+          }}
 
-- name: Docker Stack Status
-  hosts: all
-  gather_facts: false
+    - name: Determine available managers
+      ansible.builtin.set_fact:
+        docker_available_managers: >-
+          {{
+            docker_swarm_manager_candidates
+            | selectattr('docker_is_available_manager', 'defined')
+            | selectattr('docker_is_available_manager', 'equalto', true)
+            | list
+        }}
 
-  roles:
-    - docker-stack-status
+    - name: Fail if no reachable manager exists
+      ansible.builtin.fail:
+        msg: >-
+          No reachable Docker Swarm manager exists for
+          environment '{{ docker_environment }}'.
+          Candidates: {{ docker_swarm_manager_candidates | join(', ') }}
+      when:
+        - docker_available_managers | length == 0
+
+    - name: Select first available manager
+      ansible.builtin.set_fact:
+        docker_deploy_manager: "{{ docker_available_managers | first }}"
+
+    - name: Display selected manager
+      ansible.builtin.debug:
+        msg:
+          - "Environment: {{ docker_environment }}"
+          - "Manager candidates: {{ docker_swarm_manager_candidates | join(', ') }}"
+          - "Available managers: {{ docker_available_managers | join(', ') }}"
+          - "Selected manager: {{ docker_deploy_manager }}"
