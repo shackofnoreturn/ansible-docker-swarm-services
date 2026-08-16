@@ -7,4 +7,4 @@ docker_services_branch_map:
   production: production
   testing: testing
   development: development
-  management: management
+  management: production
