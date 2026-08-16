@@ -11,6 +11,14 @@
   failed_when: false
   ignore_unreachable: true
 
+
+- name: DEBUG - Display reachable managers
+  ansible.builtin.debug:
+    msg: "{{ docker_swarm_manager_checks }}"
+
+
+
+
 - name: Build available manager list
   ansible.builtin.set_fact:
     docker_available_managers: >-
