@@ -44,7 +44,7 @@
             | selectattr('docker_is_available_manager', 'defined')
             | selectattr('docker_is_available_manager', 'equalto', true)
             | list
-        }}
+          }}
 
     - name: Fail if no reachable manager exists
       ansible.builtin.fail:
