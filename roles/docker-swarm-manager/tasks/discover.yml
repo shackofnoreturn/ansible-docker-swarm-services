@@ -22,6 +22,12 @@
         | list
       }}
 
+
+- name: DEBUG - Display available managers
+  ansible.builtin.debug:
+    msg: "{{ docker_available_managers }}"
+
+
 - name: Report unreachable managers
   ansible.builtin.debug:
     msg: "Skipping unreachable manager: {{ item.item }}"
