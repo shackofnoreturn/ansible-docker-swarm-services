@@ -47,8 +47,8 @@
         docker_available_managers: >-
           {{
             docker_swarm_manager_candidates
-            | select('in', groups[docker_environment])
-            | select('extract', hostvars, 'docker_is_available_manager')
+            | selectattr('docker_is_available_manager', 'defined')
+            | selectattr('docker_is_available_manager', 'equalto', true)
             | list
           }}
 
