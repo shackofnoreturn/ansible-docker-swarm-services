@@ -35,16 +35,30 @@
             groups['managers']
             | intersect(groups[docker_environment])
           }}
+    
+
+    - name: DEBUG
+      ansible.builtin.debug:
+        msg: "{{ docker_swarm_manager_candidates }}"
+
 
     - name: Determine available managers
       ansible.builtin.set_fact:
         docker_available_managers: >-
           {{
             docker_swarm_manager_candidates
-            | selectattr('docker_is_available_manager', 'defined')
-            | selectattr('docker_is_available_manager', 'equalto', true)
+            | select('in', groups[docker_environment])
+            | select('extract', hostvars, 'docker_is_available_manager')
             | list
           }}
+
+
+
+    - name: DEBUG
+      ansible.builtin.debug:
+        msg: "{{ docker_available_managers }}"
+
+
 
     - name: Fail if no reachable manager exists
       ansible.builtin.fail:
