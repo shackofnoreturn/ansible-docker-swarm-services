@@ -1,5 +1,4 @@
 ---
-
 - name: Determine environment
   ansible.builtin.set_fact:
     docker_environment: >-
@@ -10,6 +9,7 @@
       }}
   run_once: true
 
+
 - name: Validate environment
   ansible.builtin.assert:
     that:
@@ -19,8 +19,8 @@
       Could not determine the Docker environment.
       Expected one of:
       {{ docker_swarm_manager_environment_groups | join(', ') }}
-
   run_once: true
+
 
 - name: Determine manager candidates
   ansible.builtin.set_fact:
@@ -31,6 +31,7 @@
       }}
   run_once: true
 
+
 - name: Validate manager candidates
   ansible.builtin.assert:
     that:
@@ -38,12 +39,13 @@
     fail_msg: >-
       No manager candidates found for environment
       '{{ docker_environment }}'.
-
   run_once: true
+
 
 - name: Discover reachable managers
   ansible.builtin.include_tasks: discover.yml
   run_once: true
+
 
 - name: Select manager
   ansible.builtin.include_tasks: select.yml

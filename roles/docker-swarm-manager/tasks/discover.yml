@@ -1,5 +1,4 @@
 ---
-
 - name: Check SSH availability of manager candidates
   ansible.builtin.wait_for:
     host: "{{ hostvars[item].ansible_host | default(item) }}"
@@ -14,6 +13,7 @@
   changed_when: false
   failed_when: false
 
+
 - name: Build reachable manager list
   ansible.builtin.set_fact:
     docker_reachable_managers: >-
@@ -24,6 +24,7 @@
         | list
       }}
 
+
 - name: Show skipped managers
   ansible.builtin.debug:
     msg: >-
@@ -31,6 +32,8 @@
   loop: "{{ docker_manager_ssh_checks.results }}"
   when: item.failed | default(false)
 
+
+# FIXME Immense errors for absent nodes
 - name: Check Docker Swarm manager status
   ansible.builtin.command:
     cmd: docker info --format '{{ "{{.Swarm.ControlAvailable}}" }}'
@@ -39,6 +42,7 @@
   changed_when: false
   failed_when: false
   loop: "{{ docker_reachable_managers }}"
+
 
 - name: Build active manager list
   ansible.builtin.set_fact:
@@ -51,6 +55,8 @@
         | list
       }}
 
+
+# FIXME What's the use?
 - name: Show non-manager hosts
   ansible.builtin.debug:
     msg: >-

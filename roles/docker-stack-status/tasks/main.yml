@@ -4,9 +4,10 @@
 #     cmd: docker stack ls
 #   register: stack_list
 
-- name: Shows stack info
+- name: Show stack list
   community.docker.docker_stack_info:
-  register: stack_list
+  delegate_to: "{{ docker_deploy_manager }}"
+  register: docker_stack_list
 
 
 # - name: Stack services
@@ -14,14 +15,25 @@
 #     cmd: docker stack services {{ stack_name }}
 #   register: stack_services
 
-- name: Stack services
+- name: Show stack services
   community.docker.docker_swarm_service_info:
-    name: myservice
+    name: "{{ stack_name }}"
+  delegate_to: "{{ docker_deploy_manager }}"
   register: stack_services
 
 
 - name: Display stack status
-  debug:
+  ansible.builtin.debug:
     msg:
-      - "{{ stack_list.stdout_lines }}"
-      - "{{ stack_services.stdout_lines }}"
+      - "========================================"
+      - "Environment: {{ docker_environment }}"
+      - "Manager:    {{ docker_deploy_manager }}"
+      - "Stack:      {{ stack_name }}"
+      - "========================================"
+      - ""
+      - "Docker stacks:"
+      - "{{ docker_stack_list.stdout }}"
+      - ""
+      - "Stack services:"
+      - "{{ docker_stack_services.stdout }}"
+  run_once: true

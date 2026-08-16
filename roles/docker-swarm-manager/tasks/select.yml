@@ -11,6 +11,7 @@
   when:
     - docker_available_managers | length == 0
 
+
 - name: Select first available manager
   ansible.builtin.set_fact:
     docker_deploy_manager: "{{ docker_available_managers | first }}"
