@@ -1,43 +1,9 @@
 ---
-- name: Check manager SSH availability
-  ansible.builtin.wait_for:
-    host: "{{ hostvars[item].ansible_host | default(item) }}"
-    port: "{{ docker_swarm_manager_ssh_port }}"
-    state: started
-    timeout: "{{ docker_swarm_manager_ssh_timeout }}"
-    connect_timeout: "{{ docker_swarm_manager_probe_timeout }}"
-  delegate_to: localhost
-  loop: "{{ docker_swarm_manager_candidates }}"
-  loop_control:
-    label: "{{ item }}"
-  register: docker_manager_ssh_checks
-  changed_when: false
-  failed_when: false
-
-- name: Build reachable manager list
-  ansible.builtin.set_fact:
-    docker_reachable_managers: >-
-      {{
-        docker_manager_ssh_checks.results
-        | selectattr('failed', 'equalto', false)
-        | map(attribute='item')
-        | list
-      }}
-
-- name: Report unreachable managers
-  ansible.builtin.debug:
-    msg: "Skipping unreachable manager: {{ item.item }}"
-  loop: "{{ docker_manager_ssh_checks.results }}"
-  loop_control:
-    label: "{{ item.item }}"
-  when:
-    - item.failed | default(false)
-
-- name: Check Docker Swarm manager status
+- name: Check Docker Swarm state on manager candidates
   ansible.builtin.command:
-    cmd: docker info --format '{{ "{{.Swarm.ControlAvailable}}" }}'
+    cmd: docker info --format json
   delegate_to: "{{ item }}"
-  loop: "{{ docker_reachable_managers }}"
+  loop: "{{ docker_swarm_manager_candidates }}"
   loop_control:
     label: "{{ item }}"
   register: docker_swarm_manager_checks
@@ -45,42 +11,42 @@
   failed_when: false
   ignore_unreachable: true
 
-
-
 - name: DEBUG
   ansible.builtin.debug:
-    msg: "{{ docker_swarm_manager_checks }}"
-
-
+    var: docker_swarm_manager_checks
 
 - name: Build available manager list
   ansible.builtin.set_fact:
     docker_available_managers: >-
       {{
         docker_swarm_manager_checks.results
-        | selectattr('rc', 'defined')
+        | selectattr('unreachable', 'undefined')
         | selectattr('rc', 'equalto', 0)
         | selectattr('stdout', 'defined')
-        | selectattr('stdout', 'equalto', 'true')
+        | selectattr('stdout', 'ne', '')
+        | selectattr('stdout', 'search', '"ControlAvailable"')
         | map(attribute='item')
         | list
       }}
 
-
-
-- name: DEBUG
+- name: Report unreachable managers
   ansible.builtin.debug:
-    msg: "{{ docker_available_managers }}"
-  
-
-
-- name: Report reachable non-managers
-  ansible.builtin.debug:
-    msg: "{{ item.item }} is reachable but is not a Swarm manager."
+    msg: "Skipping unreachable manager: {{ item.item }}"
   loop: "{{ docker_swarm_manager_checks.results }}"
   loop_control:
     label: "{{ item.item }}"
   when:
-    - item.rc is defined
-    - item.rc == 0
-    - item.stdout | trim != 'true'
+    - item.unreachable is defined
+
+- name: Report Docker query failures
+  ansible.builtin.debug:
+    msg: >-
+      Could not query Docker on {{ item.item }}.
+      Return code: {{ item.rc | default('unknown') }}
+      Error: {{ item.msg | default('unknown') }}
+  loop: "{{ docker_swarm_manager_checks.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - item.unreachable is not defined
+    - item.rc | default(1) != 0
