@@ -1,0 +1,25 @@
+---
+
+- name: Fail if no reachable manager exists
+  ansible.builtin.fail:
+    msg: >-
+      No reachable Docker Swarm managers were found for
+      environment '{{ docker_environment }}'.
+
+      Manager candidates:
+      {{ docker_swarm_manager_candidates | join(', ') }}
+  when:
+    - docker_available_managers | length == 0
+
+- name: Select first available manager
+  ansible.builtin.set_fact:
+    docker_deploy_manager: "{{ docker_available_managers | first }}"
+  when:
+    - docker_available_managers | length > 0
+
+- name: Show selected manager
+  ansible.builtin.debug:
+    msg:
+      - "Environment: {{ docker_environment }}"
+      - "Manager: {{ docker_deploy_manager }}"
+      - "Available managers: {{ docker_available_managers | join(', ') }}"

@@ -1,8 +1,9 @@
 ---
-- name: Stack Status
-  hosts: managers
+- name: Docker Stack Status
+  hosts: all
   become: true
   gather_facts: false
 
   roles:
+    - docker-swarm-manager
     - docker-stack-status

@@ -1,0 +1,61 @@
+---
+
+- name: Check SSH availability of manager candidates
+  ansible.builtin.wait_for:
+    host: "{{ hostvars[item].ansible_host | default(item) }}"
+    port: "{{ docker_swarm_manager_ssh_port }}"
+    state: started
+    timeout: "{{ docker_swarm_manager_ssh_timeout }}"
+    connect_timeout: "{{ docker_swarm_manager_probe_timeout }}"
+  loop: "{{ docker_swarm_manager_candidates }}"
+  register: docker_manager_ssh_checks
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  failed_when: false
+
+- name: Build reachable manager list
+  ansible.builtin.set_fact:
+    docker_reachable_managers: >-
+      {{
+        docker_manager_ssh_checks.results
+        | selectattr('failed', 'equalto', false)
+        | map(attribute='item')
+        | list
+      }}
+
+- name: Show skipped managers
+  ansible.builtin.debug:
+    msg: >-
+      Skipping {{ item.item }} because SSH is unreachable.
+  loop: "{{ docker_manager_ssh_checks.results }}"
+  when: item.failed | default(false)
+
+- name: Check Docker Swarm manager status
+  ansible.builtin.command:
+    cmd: docker info --format '{{ "{{.Swarm.ControlAvailable}}" }}'
+  delegate_to: "{{ item }}"
+  register: docker_swarm_manager_checks
+  changed_when: false
+  failed_when: false
+  loop: "{{ docker_reachable_managers }}"
+
+- name: Build active manager list
+  ansible.builtin.set_fact:
+    docker_available_managers: >-
+      {{
+        docker_swarm_manager_checks.results
+        | selectattr('rc', 'equalto', 0)
+        | selectattr('stdout', 'equalto', 'true')
+        | map(attribute='item')
+        | list
+      }}
+
+- name: Show non-manager hosts
+  ansible.builtin.debug:
+    msg: >-
+      {{ item.item }} is reachable but is not currently a Swarm manager.
+  loop: "{{ docker_swarm_manager_checks.results }}"
+  when:
+    - item.rc | default(1) == 0
+    - item.stdout | default('') | trim != 'true'
