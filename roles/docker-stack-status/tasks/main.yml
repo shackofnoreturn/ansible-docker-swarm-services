@@ -1,13 +1,22 @@
 ---
-- name: Stack list
-  command:
-    cmd: docker stack ls
+# - name: Stack list
+#   command:
+#     cmd: docker stack ls
+#   register: stack_list
+
+- name: Shows stack info
+  community.docker.docker_stack_info:
   register: stack_list
 
 
+# - name: Stack services
+#   command:
+#     cmd: docker stack services {{ stack_name }}
+#   register: stack_services
+
 - name: Stack services
-  command:
-    cmd: docker stack services {{ stack_name }}
+  community.docker.docker_swarm_service_info:
+    name: myservice
   register: stack_services
 
 
