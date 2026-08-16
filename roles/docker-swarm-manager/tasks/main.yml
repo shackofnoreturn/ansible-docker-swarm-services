@@ -23,7 +23,6 @@
     fail_msg: >-
       Could not determine the Docker environment from the hosts
       targeted by this play.
-  delegate_to: localhost
   run_once: true
 
 - name: Determine manager candidates
@@ -46,17 +45,14 @@
     fail_msg: >-
       No manager candidates found for environment
       '{{ hostvars['localhost'].docker_environment }}'.
-  delegate_to: localhost
   run_once: true
 
 - name: Discover reachable managers
   ansible.builtin.include_tasks: discover.yml
-  delegate_to: localhost
   run_once: true
 
 - name: Select deployment manager
   ansible.builtin.include_tasks: select.yml
-  delegate_to: localhost
   run_once: true
 
 - name: Share environment with all hosts
@@ -82,3 +78,4 @@
   ansible.builtin.set_fact:
     docker_deploy_manager: >-
       {{ hostvars['localhost'].docker_deploy_manager }}
+      
