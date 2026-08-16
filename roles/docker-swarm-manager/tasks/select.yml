@@ -3,30 +3,22 @@
   ansible.builtin.fail:
     msg: >-
       No reachable Docker Swarm managers were found for
-      environment '{{ hostvars['localhost'].docker_environment }}'.
+      environment '{{ docker_environment }}'.
 
       Manager candidates:
-      {{
-        hostvars['localhost'].docker_swarm_manager_candidates
-        | join(', ')
-      }}
+      {{ docker_swarm_manager_candidates | join(', ') }}
   when:
-    - hostvars['localhost'].docker_available_managers | length == 0
+    - docker_available_managers | length == 0
 
 - name: Select first available manager
   ansible.builtin.set_fact:
-    docker_deploy_manager: >-
-      {{ hostvars['localhost'].docker_available_managers | first }}
-  delegate_to: localhost
-  delegate_facts: true
-  when:
-    - hostvars['localhost'].docker_available_managers | length > 0
+    docker_deploy_manager: "{{ docker_available_managers | first }}"
 
-- name: Display selected deployment manager
+- name: Display selected manager
   ansible.builtin.debug:
     msg:
-      - "Environment: {{ hostvars['localhost'].docker_environment }}"
-      - "Manager candidates: {{ hostvars['localhost'].docker_swarm_manager_candidates | join(', ') }}"
-      - "Reachable managers: {{ hostvars['localhost'].docker_reachable_managers | join(', ') }}"
-      - "Available managers: {{ hostvars['localhost'].docker_available_managers | join(', ') }}"
-      - "Selected manager: {{ hostvars['localhost'].docker_deploy_manager }}"
+      - "Environment: {{ docker_environment }}"
+      - "Manager candidates: {{ docker_swarm_manager_candidates | join(', ') }}"
+      - "Reachable managers: {{ docker_reachable_managers | join(', ') }}"
+      - "Available managers: {{ docker_available_managers | join(', ') }}"
+      - "Selected manager: {{ docker_deploy_manager }}"

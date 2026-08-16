@@ -1,9 +1,36 @@
 ---
+- name: Discover Docker Swarm manager
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  roles:
+    - docker-swarm-manager
+
+
 - name: Docker Stack Status
   hosts: all
   become: true
   gather_facts: false
 
-  roles:
-    - docker-swarm-manager
-    - docker-stack-status
+  tasks:
+
+    - name: Show stack status
+      ansible.builtin.command:
+        cmd: docker stack services {{ stack_name }}
+      delegate_to: "{{ hostvars['localhost'].docker_deploy_manager }}"
+      register: docker_stack_status
+      changed_when: false
+      run_once: true
+
+    - name: Display stack status
+      ansible.builtin.debug:
+        msg:
+          - "========================================"
+          - "Environment: {{ hostvars['localhost'].docker_environment }}"
+          - "Manager:    {{ hostvars['localhost'].docker_deploy_manager }}"
+          - "Stack:      {{ stack_name }}"
+          - "========================================"
+          - ""
+          - "{{ docker_stack_status.stdout }}"
+      run_once: true

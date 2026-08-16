@@ -6,8 +6,9 @@
     state: started
     timeout: "{{ docker_swarm_manager_ssh_timeout }}"
     connect_timeout: "{{ docker_swarm_manager_probe_timeout }}"
-  loop: "{{ hostvars['localhost'].docker_swarm_manager_candidates }}"
+  loop: "{{ docker_swarm_manager_candidates }}"
   register: docker_manager_ssh_checks
+  delegate_to: localhost
   changed_when: false
   failed_when: false
 
@@ -20,8 +21,6 @@
         | map(attribute='item')
         | list
       }}
-  delegate_to: localhost
-  delegate_facts: true
 
 - name: Report unreachable managers
   ansible.builtin.debug:
@@ -34,30 +33,32 @@
   ansible.builtin.command:
     cmd: docker info --format '{{ "{{.Swarm.ControlAvailable}}" }}'
   delegate_to: "{{ item }}"
+  loop: "{{ docker_reachable_managers }}"
   register: docker_swarm_manager_checks
   changed_when: false
   failed_when: false
-  loop: "{{ hostvars['localhost'].docker_reachable_managers }}"
+  ignore_unreachable: true
 
 - name: Build available manager list
   ansible.builtin.set_fact:
     docker_available_managers: >-
       {{
         docker_swarm_manager_checks.results
+        | selectattr('rc', 'defined')
         | selectattr('rc', 'equalto', 0)
+        | selectattr('stdout', 'defined')
         | selectattr('stdout', 'equalto', 'true')
         | map(attribute='item')
         | list
       }}
-  delegate_to: localhost
-  delegate_facts: true
 
-- name: Report reachable non-manager hosts
+- name: Report hosts that are not Swarm managers
   ansible.builtin.debug:
     msg: >-
-      {{ item.item }} is reachable but is not currently a
-      Docker Swarm manager.
+      {{ item.item }} is reachable but is not currently
+      a Docker Swarm manager.
   loop: "{{ docker_swarm_manager_checks.results }}"
   when:
-    - item.rc | default(1) == 0
-    - item.stdout | default('') | trim != 'true'
+    - item.rc is defined
+    - item.rc == 0
+    - item.stdout | trim != 'true'
