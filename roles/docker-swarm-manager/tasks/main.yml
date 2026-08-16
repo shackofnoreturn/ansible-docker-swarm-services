@@ -1,24 +1,13 @@
 ---
-- name: Determine target environment
-  ansible.builtin.set_fact:
-    docker_environment: >-
-      {{
-        ansible_play_hosts_all
-        | map('extract', hostvars)
-        | map(attribute='group_names')
-        | flatten
-        | intersect(docker_swarm_manager_environment_groups)
-        | unique
-        | first
-      }}
-
 - name: Validate target environment
   ansible.builtin.assert:
     that:
       - docker_environment is defined
       - docker_environment | length > 0
+      - docker_environment in docker_swarm_manager_environment_groups
     fail_msg: >-
-      Could not determine the Docker environment.
+      docker_environment must be one of:
+      {{ docker_swarm_manager_environment_groups | join(', ') }}
 
 - name: Determine manager candidates
   ansible.builtin.set_fact:
@@ -33,8 +22,8 @@
     that:
       - docker_swarm_manager_candidates | length > 0
     fail_msg: >-
-      No Docker manager candidates found for environment
-      '{{ docker_environment }}'.
+      No Docker Swarm manager candidates found for
+      environment '{{ docker_environment }}'.
 
 - name: Initialize manager lists
   ansible.builtin.set_fact:
