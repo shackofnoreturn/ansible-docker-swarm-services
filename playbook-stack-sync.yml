@@ -1,8 +1,8 @@
 ---
-- name: Synchronize service repository
+- name: Synchronize Stack Repository
   hosts: all
   become: true
   gather_facts: false
 
   roles:
-    - docker-services-sync
+    - docker-stack-sync

@@ -1,5 +1,5 @@
 ---
-docker_services_repo: "https://github.com/shackofnoreturn/ansible-docker-swarm-services.git"
+docker_services_repo: "git@github.com:shackofnoreturn/shackhq-docker-stacks.git"
 
 docker_services_root: /opt/services
 
