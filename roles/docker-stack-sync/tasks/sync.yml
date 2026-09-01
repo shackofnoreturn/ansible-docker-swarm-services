@@ -13,7 +13,7 @@
 
 - name: Set deploy key path
   set_fact:
-    docker_git_ssh_key_path: "/tmp/docker_services_deploy_key_{{ ansible_date_time.epoch }}"
+    docker_git_ssh_key_path: "/tmp/docker_services_deploy_key"
 
 - block:
     - name: Write deploy key to disk
