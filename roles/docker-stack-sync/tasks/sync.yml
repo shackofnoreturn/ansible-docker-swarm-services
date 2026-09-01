@@ -23,7 +23,7 @@
 - block:
     - name: Write deploy key to disk
       copy:
-        content: "{{ docker_stacks_deploy_key }}"
+        content: "{{ docker_stacks_deploy_key | replace('\\n', '\n') }}"
         dest: "{{ docker_git_ssh_key_path }}"
         mode: "0600"
       no_log: true
