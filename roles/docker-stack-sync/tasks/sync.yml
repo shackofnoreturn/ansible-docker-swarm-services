@@ -15,6 +15,11 @@
   set_fact:
     docker_git_ssh_key_path: "/tmp/docker_services_deploy_key"
 
+- name: Set deploy key from environment variable
+  set_fact:
+    docker_stacks_deploy_key: "{{ lookup('env', 'docker_stacks_deploy_key') }}"
+  no_log: true
+
 - block:
     - name: Write deploy key to disk
       copy:
