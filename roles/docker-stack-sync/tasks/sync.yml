@@ -36,11 +36,11 @@
         force: true
         accept_hostkey: true
         key_file: "{{ docker_git_ssh_key_path }}"
-  always:
-    - name: Remove deploy key from disk
-      file:
-        path: "{{ docker_git_ssh_key_path }}"
-        state: absent
+  # always:
+  #   - name: Remove deploy key from disk
+  #     file:
+  #       path: "{{ docker_git_ssh_key_path }}"
+  #       state: absent
 
 
 - name: Clone repository
