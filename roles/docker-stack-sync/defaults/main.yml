@@ -1,7 +1,7 @@
 ---
 docker_services_repo: "git@github.com:shackofnoreturn/shackhq-docker-stacks.git"
 
-docker_services_root: /opt/services
+docker_services_root: /opt/docker
 
 docker_services_branch_map:
   production: production
