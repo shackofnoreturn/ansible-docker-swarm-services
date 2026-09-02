@@ -1,10 +1,12 @@
 ---
-
 - name: Check stack manifest exists
   stat:
     path: "{{ stack_path }}/stack.yml"
   register: stack_manifest
 
+- name: Debug
+  ansible.bu!iltin.debug:
+    msg: "{{ stack_manifest }}"
 
 - name: Fail if manifest missing
   assert:
