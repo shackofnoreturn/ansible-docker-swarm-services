@@ -4,5 +4,5 @@
     name: "{{ stack_name }}"
     compose:
       - "{{ stack_path }}/{{ stack_definition.compose_file }}"
-    environment: "{{ stack_environment }}"
+  environment: "{{ stack_environment }}"
   delegate_to: "{{ docker_active_manager }}"
