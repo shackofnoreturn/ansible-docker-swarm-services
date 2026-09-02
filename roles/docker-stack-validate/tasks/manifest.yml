@@ -5,7 +5,7 @@
   register: stack_manifest
 
 - name: Debug
-  ansible.bu!iltin.debug:
+  ansible.builtin.debug:
     msg: "{{ stack_manifest }}"
 
 - name: Fail if manifest missing
