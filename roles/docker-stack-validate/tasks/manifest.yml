@@ -20,6 +20,7 @@
   ansible.builtin.set_fact:
     global_definition: "{{ global_manifest_content.content | b64decode | from_yaml }}"
 
+
 - name: Check stack manifest exists
   ansible.builtin.stat:
     path: "{{ stack_path }}/stack.yml"
@@ -40,6 +41,7 @@
 - name: Parse stack manifest
   ansible.builtin.set_fact:
     stack_definition: "{{ stack_manifest_content.content | b64decode | from_yaml }}"
+
 
 - name: Build stack environment
   ansible.builtin.set_fact:

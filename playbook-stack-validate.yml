@@ -5,5 +5,4 @@
   gather_facts: false
 
   roles:
-    # - docker-stack-sync
     - docker-stack-validate
