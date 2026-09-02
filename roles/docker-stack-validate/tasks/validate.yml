@@ -1,7 +1,7 @@
 ---
 - name: Check compose file exists
   stat:
-    path: "{{ stack_path }}/{{ stack_definition.compose_file }}"
+    path: "{{ stack_path }}/{{ stack_manifest.compose_file }}"
   register: compose_file
 
 
@@ -12,13 +12,13 @@
     fail_msg:
       >
       Missing compose file:
-      {{ stack_definition.compose_file }}
+      {{ stack_manifest.compose_file }}
 
 
 - name: Validate runtime directories
   stat:
     path: "{{ item }}"
-  loop: "{{ stack_definition.runtime_directories | default([]) }}"
+  loop: "{{ stack_manifest.runtime_directories | default([]) }}"
   register: runtime_checks
 
 

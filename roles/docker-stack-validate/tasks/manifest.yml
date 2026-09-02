@@ -4,10 +4,6 @@
     path: "{{ stack_path }}/stack.yml"
   register: stack_manifest
 
-- name: Debug
-  ansible.builtin.debug:
-    msg: "{{ stack_manifest }}"
-
 - name: Fail if manifest missing
   assert:
     that:
@@ -18,4 +14,4 @@
 - name: Load stack manifest
   include_vars:
     file: "{{ stack_path }}/stack.yml"
-    name: stack_definition
+    name: stack_manifest
