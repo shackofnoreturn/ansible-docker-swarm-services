@@ -13,5 +13,5 @@
 
 - name: Load stack manifest
   include_vars:
-    file: "{{ stack_path }}/stack.yml"
-    name: stack_manifest
+    remote_src: "{{ stack_path }}/stack.yml"
+    name: stack_definition
