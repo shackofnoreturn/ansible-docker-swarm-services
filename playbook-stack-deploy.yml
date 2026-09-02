@@ -5,6 +5,6 @@
   gather_facts: false
 
   roles:
-    - docker-services-sync
+    - docker-stack-sync
     - docker-stack-validate
     - docker-stack-deploy
