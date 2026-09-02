@@ -1,7 +1,0 @@
----
-stack_name: traefik
-
-compose_file: compose.yml
-
-runtime_directories:
-  - /opt/docker-data/traefik

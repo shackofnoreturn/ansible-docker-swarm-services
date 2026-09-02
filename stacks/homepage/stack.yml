@@ -1,7 +1,0 @@
----
-stack_name: homepage
-
-compose_file: compose.yml
-
-runtime_directories:
-  - /opt/docker-data/homepage
