@@ -1,4 +1,25 @@
 ---
+- name: Check global manifest exists
+  ansible.builtin.stat:
+    path: "{{ docker_services_root }}/global.yml"
+  register: global_manifest
+
+- name: Fail if global manifest missing
+  ansible.builtin.assert:
+    that:
+      - global_manifest.stat.exists
+    fail_msg: >
+      Global manifest {{ docker_services_root }}/global.yml does not exist
+
+- name: Read global manifest from remote host
+  ansible.builtin.slurp:
+    src: "{{ docker_services_root }}/global.yml"
+  register: global_manifest_content
+
+- name: Parse global manifest
+  ansible.builtin.set_fact:
+    global_definition: "{{ global_manifest_content.content | b64decode | from_yaml }}"
+
 - name: Check stack manifest exists
   ansible.builtin.stat:
     path: "{{ stack_path }}/stack.yml"
@@ -19,3 +40,11 @@
 - name: Parse stack manifest
   ansible.builtin.set_fact:
     stack_definition: "{{ stack_manifest_content.content | b64decode | from_yaml }}"
+
+- name: Build stack environment
+  ansible.builtin.set_fact:
+    stack_environment: >-
+      {{
+        global_definition.environment | default({})
+        | combine(stack_definition.environment | default({}))
+      }}
