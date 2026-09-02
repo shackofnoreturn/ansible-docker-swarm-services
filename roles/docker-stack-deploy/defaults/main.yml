@@ -1,6 +1,6 @@
 ---
 stack_name: ""
 
-stack_path: "/opt/services/stacks/{{ stack_name }}"
+stack_path: "/opt/docker/stacks/{{ stack_name }}"
 
-docker_data_root: /opt/docker-data
+docker_data_root: /opt/docker/data
