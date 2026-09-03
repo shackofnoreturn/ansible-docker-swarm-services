@@ -5,7 +5,6 @@
     patterns: "*"
   register: config_files
 
-
 - name: Create docker configs
   community.docker.docker_config:
     name: "{{ stack_name }}_{{ item.path | basename }}"
