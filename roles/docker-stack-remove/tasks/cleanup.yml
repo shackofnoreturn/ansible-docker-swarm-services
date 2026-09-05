@@ -21,7 +21,7 @@
 
 - name: Remove runtime data
   file:
-    path: "/opt/docker-data/{{ stack_name }}"
+    path: "/opt/docker/data/{{ stack_name }}"
     state: absent
   when:
     - remove_runtime_data
