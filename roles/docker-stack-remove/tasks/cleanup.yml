@@ -6,7 +6,7 @@
   loop: "{{ docker_configs_to_remove | default([]) }}"
   delegate_to: "{{ docker_active_manager }}"
   when:
-    - remove_configs
+    - remove_configs | bool
 
 
 - name: Remove docker secrets
@@ -16,7 +16,7 @@
   loop: "{{ docker_secrets_to_remove | default([]) }}"
   delegate_to: "{{ docker_active_manager }}"
   when:
-    - remove_secrets
+    - remove_secrets | bool
 
 
 - name: Remove runtime data
@@ -24,4 +24,4 @@
     path: "/opt/docker/data/{{ stack_name }}"
     state: absent
   when:
-    - remove_runtime_data
+    - remove_runtime_data | bool
