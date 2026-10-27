@@ -4,6 +4,17 @@
   become: true
   gather_facts: false
 
+  pre_tasks:
+    - name: Check host connectivity
+      ansible.builtin.ping:
+      become: false
+      register: host_connectivity
+      ignore_unreachable: true
+
+    - name: Skip unreachable hosts
+      ansible.builtin.meta: end_host
+      when: host_connectivity.unreachable | default(false)
+
   roles:
     - docker-stack-sync
     - docker-stack-validate
