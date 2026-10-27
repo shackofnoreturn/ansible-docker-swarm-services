@@ -6,3 +6,4 @@
       - "{{ stack_path }}/{{ stack_definition.compose_file }}"
   environment: "{{ stack_environment }}"
   delegate_to: "{{ docker_active_manager }}"
+  run_once: true
