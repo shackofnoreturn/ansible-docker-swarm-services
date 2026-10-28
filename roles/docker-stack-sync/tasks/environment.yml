@@ -28,3 +28,7 @@
 - name: Determine branch
   set_fact:
     docker_git_branch: "{{ docker_services_branch_map[docker_environment] }}"
+
+- name: Select Git ref
+  set_fact:
+    docker_git_version: "{{ docker_services_git_ref | default(docker_git_branch, true) }}"

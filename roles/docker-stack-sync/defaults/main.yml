@@ -8,3 +8,5 @@ docker_services_branch_map:
   testing: testing
   development: development
   management: production
+
+docker_services_git_ref: ""

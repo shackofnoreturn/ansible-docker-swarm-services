@@ -32,7 +32,7 @@
       git:
         repo: "{{ docker_services_repo }}"
         dest: "{{ docker_services_root }}"
-        version: "{{ docker_git_branch }}"
+        version: "{{ docker_git_version }}"
         force: true
         accept_hostkey: true
         key_file: "{{ docker_git_ssh_key_path }}"
@@ -53,5 +53,5 @@
   debug:
     msg:
       - "Environment : {{ docker_environment }}"
-      - "Branch      : {{ docker_git_branch }}"
+      - "Git ref     : {{ docker_git_version }}"
       - "Commit      : {{ git_commit.stdout }}"

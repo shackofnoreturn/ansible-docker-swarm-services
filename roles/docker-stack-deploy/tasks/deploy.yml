@@ -2,8 +2,7 @@
 - name: Deploy stack
   community.docker.docker_stack:
     name: "{{ stack_name }}"
-    compose:
-      - "{{ stack_path }}/{{ stack_definition.compose_file }}"
+    compose: "{{ stack_compose_paths }}"
   environment: "{{ stack_environment }}"
   delegate_to: "{{ docker_active_manager }}"
   run_once: true
