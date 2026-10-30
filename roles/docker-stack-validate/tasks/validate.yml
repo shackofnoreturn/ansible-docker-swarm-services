@@ -187,33 +187,33 @@
   run_once: true
 
 
-- name: Validate runtime directories
+- name: Validate required pre-existing directories
   stat:
     path: "{{ item }}"
-  loop: "{{ stack_definition.runtime_directories | default([]) }}"
-  register: runtime_checks
+  loop: "{{ stack_definition.required_directories | default([]) }}"
+  register: required_directory_checks
   delegate_to: "{{ docker_active_manager }}"
   run_once: true
 
-- name: Initialize missing runtime directory list
+- name: Initialize missing required directory list
   set_fact:
-    missing_runtime_directories: []
+    missing_required_directories: []
   run_once: true
 
-- name: Collect missing runtime directories
+- name: Collect missing required directories
   set_fact:
-    missing_runtime_directories: "{{ missing_runtime_directories + [item.item] }}"
-  loop: "{{ runtime_checks.results }}"
+    missing_required_directories: "{{ missing_required_directories + [item.item] }}"
+  loop: "{{ required_directory_checks.results | default([]) }}"
   when: not (item.stat.isdir | default(false))
   run_once: true
 
-- name: Fail when runtime directories are missing
+- name: Fail when required directories are missing
   assert:
     that:
-      - missing_runtime_directories | length == 0
+      - missing_required_directories | length == 0
     fail_msg: >-
-      Runtime directories are missing for stack {{ stack_name }}:
-      {{ missing_runtime_directories }}
+      Required pre-existing directories are missing for stack {{ stack_name }}:
+      {{ missing_required_directories }}
   run_once: true
 
 - name: Display validation result

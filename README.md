@@ -22,9 +22,11 @@ ansible-playbook \
 
 Validation synchronizes the selected stack revision, checks its manifest and
 Compose files, validates the merged Compose configuration with `docker compose
-config --format json` on the active Swarm manager, confirms declared runtime
-directories exist, and checks that all Compose-declared external networks and
-secrets exist in the target Swarm. For every service with placement
+config --format json` on the active Swarm manager, checks any declared
+`required_directories`, and checks that all Compose-declared external networks
+and secrets exist in the target Swarm. `required_directories` are paths that
+must already exist, such as external mounts. `runtime_directories` are created
+by the deploy role and are not preflight prerequisites. For every service with placement
 constraints, it also verifies that at least one Ready and Active node has the
 required role and labels. Placement constraints must use `node.role == <role>`
 or `node.labels.<label> == <value>`. The active manager must have Docker and the
