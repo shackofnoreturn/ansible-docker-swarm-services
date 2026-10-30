@@ -133,43 +133,49 @@
   loop: "{{ stack_placement_services }}"
   run_once: true
 
-- name: Inspect Swarm nodes for placement validation
-  shell:
-    cmd: "docker node inspect $(docker node ls -q) --format '{{ '{{json .}}' }}'"
-  register: swarm_node_inspection
-  changed_when: false
-  run_once: true
-  delegate_to: "{{ docker_active_manager }}"
-
-- name: Parse Swarm node details
-  set_fact:
-    stack_swarm_nodes: "{{ swarm_node_inspection.stdout_lines | map('from_json') | list }}"
-    stack_swarm_node_summaries: []
-  run_once: true
-
-- name: Summarize Swarm node placement attributes
-  set_fact:
-    stack_swarm_node_summaries: >-
+- name: Check placement candidates for each service
+  command:
+    argv: >-
       {{
-        stack_swarm_node_summaries + [
-          {
-            'hostname': item.Description.Hostname | default(item.ID),
-            'role': item.Spec.Role | default('unknown'),
-            'state': item.Status.State | default('unknown'),
-            'availability': item.Spec.Availability | default('unknown'),
-            'labels': item.Spec.Labels | default({})
-          }
-        ]
+        ['docker', 'node', 'ls']
+        + (
+          placement_service.value.deploy.placement.constraints
+          | map('regex_replace', '^node.role == ([^ ]+)$', '--filter=role=\\1')
+          | map('regex_replace', '^node.labels.([^ ]+) == ([^ ]+)$', '--filter=label=\\1=\\2')
+          | list
+        )
+        + ['--format', '{{json .}}']
       }}
-  loop: "{{ stack_swarm_nodes }}"
-  run_once: true
-
-- name: Validate eligible nodes for services
-  include_tasks: placement-service.yml
   loop: "{{ stack_placement_services }}"
   loop_control:
     loop_var: placement_service
     label: "{{ placement_service.key }}"
+  register: placement_node_checks
+  changed_when: false
+  failed_when: false
+  delegate_to: "{{ docker_active_manager }}"
+  run_once: true
+
+- name: Require a Ready and Active placement candidate
+  assert:
+    that:
+      - item.rc == 0
+      - >-
+        item.stdout_lines
+        | map('from_json')
+        | selectattr('Status', 'equalto', 'Ready')
+        | selectattr('Availability', 'equalto', 'Active')
+        | list
+        | length > 0
+    fail_msg: >-
+      No Ready and Active Swarm node matches the placement constraints for
+      service {{ item.placement_service.key }} in stack {{ stack_name }}.
+      Constraints: {{ item.placement_service.value.deploy.placement.constraints }}.
+      Docker node ls candidates: {{ item.stdout_lines | default([]) }}.
+      Check node roles, labels, and availability in the target Swarm.
+  loop: "{{ placement_node_checks.results }}"
+  loop_control:
+    label: "{{ item.placement_service.key }}"
   run_once: true
 
 
