@@ -20,17 +20,51 @@
       One or more Compose files are missing for stack {{ stack_name }}:
       {{ stack_compose_paths }}
 
+- name: Validate merged Compose configuration
+  command:
+    cmd: >-
+      docker compose
+      {{ stack_compose_paths | map('regex_replace', '^', '-f ') | join(' ') }}
+      config --quiet
+  environment: "{{ stack_environment }}"
+  register: compose_validation
+  changed_when: false
+  delegate_to: "{{ docker_active_manager }}"
+  run_once: true
+
+- name: Fail on invalid Compose or unresolved variables
+  assert:
+    that:
+      - compose_validation.rc == 0
+      - compose_validation.stderr | regex_search('(?i)variable .+ is not set') is none
+    fail_msg: >-
+      Compose validation failed for stack {{ stack_name }}.
+      Return code: {{ compose_validation.rc }}.
+      Diagnostics: {{ compose_validation.stderr | default('') }}
+  run_once: true
+
 
 - name: Validate runtime directories
   stat:
     path: "{{ item }}"
   loop: "{{ stack_definition.runtime_directories | default([]) }}"
   register: runtime_checks
+  delegate_to: "{{ docker_active_manager }}"
+  run_once: true
 
+- name: Fail when runtime directories are missing
+  assert:
+    that:
+      - runtime_checks.results | rejectattr('stat.isdir') | list | length == 0
+    fail_msg: >-
+      Runtime directories are missing for stack {{ stack_name }}:
+      {{ runtime_checks.results | rejectattr('stat.isdir') | map(attribute='item') | list }}
+  run_once: true
 
 - name: Display validation result
   debug:
     msg:
       - "Stack: {{ stack_name }}"
       - "Path: {{ stack_path }}"
-      - "Validation successful"
+      - "Compose and runtime prerequisites validated"
+  run_once: true
