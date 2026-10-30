@@ -198,10 +198,10 @@
 - name: Fail when runtime directories are missing
   assert:
     that:
-      - runtime_checks.results | rejectattr('stat.isdir') | list | length == 0
+      - runtime_checks.results | map(attribute='stat') | selectattr('isdir', 'equalto', true) | list | length == runtime_checks.results | length
     fail_msg: >-
       Runtime directories are missing for stack {{ stack_name }}:
-      {{ runtime_checks.results | rejectattr('stat.isdir') | map(attribute='item') | list }}
+      {{ runtime_checks.results | map(attribute='stat') | rejectattr('isdir', 'equalto', true) | map(attribute='path') | list }}
   run_once: true
 
 - name: Display validation result
