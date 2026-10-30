@@ -1,0 +1,42 @@
+---
+- name: Select Ready and Active node candidates
+  set_fact:
+    stack_eligible_nodes: >-
+      {{
+        stack_swarm_nodes
+        | selectattr('Status.State', 'equalto', 'ready')
+        | selectattr('Spec.Availability', 'equalto', 'active')
+        | list
+      }}
+
+- name: Filter node candidates by required Swarm role
+  set_fact:
+    stack_eligible_nodes: "{{ stack_eligible_nodes | selectattr('Spec.Role', 'equalto', item | regex_replace('^node.role == ', '')) | list }}"
+  loop: "{{ placement_service.value.deploy.placement.constraints }}"
+  when: item.startswith('node.role == ')
+
+- name: Filter node candidates by required label
+  set_fact:
+    stack_eligible_nodes: >-
+      {{
+        stack_eligible_nodes
+        | selectattr('Spec.Labels.' ~ (item | regex_replace('^node.labels.([^ ]+) == .+$', '\\1')), 'defined')
+        | selectattr(
+            'Spec.Labels.' ~ (item | regex_replace('^node.labels.([^ ]+) == .+$', '\\1')),
+            'equalto',
+            item | regex_replace('^node.labels.[^ ]+ == ', '')
+          )
+        | list
+      }}
+  loop: "{{ placement_service.value.deploy.placement.constraints }}"
+  when: item.startswith('node.labels.')
+
+- name: Require an eligible Swarm node
+  assert:
+    that:
+      - stack_eligible_nodes | length > 0
+    fail_msg: >-
+      No Ready and Active Swarm node matches placement constraints for service
+      {{ placement_service.key }} in stack {{ stack_name }}:
+      {{ placement_service.value.deploy.placement.constraints }}.
+      Check node roles, labels, and availability in the target Swarm.

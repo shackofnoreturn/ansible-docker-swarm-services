@@ -110,6 +110,50 @@
       Create the required resources in the target Swarm before deploying.
   run_once: true
 
+- name: Collect services with placement constraints
+  set_fact:
+    stack_placement_services: >-
+      {{
+        stack_compose_model.services | default({}) | dict2items
+        | selectattr('value.deploy.placement.constraints', 'defined')
+        | list
+      }}
+  run_once: true
+
+- name: Validate supported placement constraints
+  assert:
+    that:
+      - item.value.deploy.placement.constraints | reject('match', '^node\\.(role|labels\\.[A-Za-z0-9_-]+) == [^ ]+$') | list | length == 0
+    fail_msg: >-
+      Service {{ item.key }} in stack {{ stack_name }} uses a placement
+      constraint this preflight cannot check:
+      {{ item.value.deploy.placement.constraints }}.
+      Supported forms are node.role == <role> and
+      node.labels.<label> == <value>.
+  loop: "{{ stack_placement_services }}"
+  run_once: true
+
+- name: Inspect Swarm nodes for placement validation
+  shell:
+    cmd: "docker node inspect $(docker node ls -q) --format '{{ '{{json .}}' }}'"
+  register: swarm_node_inspection
+  changed_when: false
+  run_once: true
+  delegate_to: "{{ docker_active_manager }}"
+
+- name: Parse Swarm node details
+  set_fact:
+    stack_swarm_nodes: "{{ swarm_node_inspection.stdout_lines | map('from_json') | list }}"
+  run_once: true
+
+- name: Validate eligible nodes for services
+  include_tasks: placement-service.yml
+  loop: "{{ stack_placement_services }}"
+  loop_control:
+    loop_var: placement_service
+    label: "{{ placement_service.key }}"
+  run_once: true
+
 
 - name: Validate runtime directories
   stat:

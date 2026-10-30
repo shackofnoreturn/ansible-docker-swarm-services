@@ -24,9 +24,13 @@ Validation synchronizes the selected stack revision, checks its manifest and
 Compose files, validates the merged Compose configuration with `docker compose
 config --format json` on the active Swarm manager, confirms declared runtime
 directories exist, and checks that all Compose-declared external networks and
-secrets exist in the target Swarm. The active manager must have the Docker
-Compose plugin installed. Create missing external networks or secrets in the
-target environment before running `playbook-stack-deploy.yml`.
+secrets exist in the target Swarm. For every service with placement
+constraints, it also verifies that at least one Ready and Active node has the
+required role and labels. Placement constraints must use `node.role == <role>`
+or `node.labels.<label> == <value>`. The active manager must have Docker and the
+Docker Compose plugin installed. Create missing external networks or secrets,
+or correct node labels and availability, before running
+`playbook-stack-deploy.yml`.
 
 In Semaphore, select the matching environment inventory, set `stack_name`, and
 run `playbook-stack-validate.yml` as the pre-deploy step.
