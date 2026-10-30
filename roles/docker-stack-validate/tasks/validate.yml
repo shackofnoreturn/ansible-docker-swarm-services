@@ -140,8 +140,16 @@
         ['docker', 'node', 'ls']
         + (
           placement_service.value.deploy.placement.constraints
-          | map('regex_replace', '^node.role == ([^ ]+)$', '--filter=role=\\1')
-          | map('regex_replace', '^node.labels.([^ ]+) == ([^ ]+)$', '--filter=label=\\1=\\2')
+          | select('match', '^node.role == ')
+          | map('replace', 'node.role == ', '--filter=role=')
+          | list
+        )
+        + (
+          placement_service.value.deploy.placement.constraints
+          | select('match', '^node.labels\\.')
+          | map('replace', 'node.labels.', '')
+          | map('replace', ' == ', '=')
+          | map('regex_replace', '^', '--filter=label=')
           | list
         )
         + ['--format', '{{json .}}']
