@@ -22,10 +22,11 @@ ansible-playbook \
 
 Validation synchronizes the selected stack revision, checks its manifest and
 Compose files, validates the merged Compose configuration with `docker compose
-config --quiet` on the active Swarm manager, and confirms declared runtime
-directories exist. The active manager must have the Docker Compose plugin
-installed. Fix any reported missing variables, invalid Compose settings, or
-missing directories before running `playbook-stack-deploy.yml`.
+config --format json` on the active Swarm manager, confirms declared runtime
+directories exist, and checks that all Compose-declared external networks and
+secrets exist in the target Swarm. The active manager must have the Docker
+Compose plugin installed. Create missing external networks or secrets in the
+target environment before running `playbook-stack-deploy.yml`.
 
 In Semaphore, select the matching environment inventory, set `stack_name`, and
 run `playbook-stack-validate.yml` as the pre-deploy step.

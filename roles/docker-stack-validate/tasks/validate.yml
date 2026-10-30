@@ -25,7 +25,7 @@
     cmd: >-
       docker compose
       {{ stack_compose_paths | map('regex_replace', '^', '-f ') | join(' ') }}
-      config --quiet
+      config --format json
   environment: "{{ stack_environment }}"
   register: compose_validation
   changed_when: false
@@ -41,6 +41,73 @@
       Compose validation failed for stack {{ stack_name }}.
       Return code: {{ compose_validation.rc }}.
       Diagnostics: {{ compose_validation.stderr | default('') }}
+  run_once: true
+
+- name: Parse normalized Compose configuration
+  set_fact:
+    stack_compose_model: "{{ compose_validation.stdout | from_json }}"
+  run_once: true
+
+- name: Initialize external resource lists
+  set_fact:
+    stack_external_networks: []
+    stack_external_secrets: []
+  run_once: true
+
+- name: Collect external network names
+  set_fact:
+    stack_external_networks: >-
+      {{ stack_external_networks + [item.value.name | default(item.key)] }}
+  loop: "{{ stack_compose_model.networks | default({}) | dict2items }}"
+  when: item.value.external | default(false) | bool
+  run_once: true
+
+- name: Collect external secret names
+  set_fact:
+    stack_external_secrets: >-
+      {{ stack_external_secrets + [item.value.name | default(item.key)] }}
+  loop: "{{ stack_compose_model.secrets | default({}) | dict2items }}"
+  when: item.value.external | default(false) | bool
+  run_once: true
+
+- name: Inspect required external networks
+  command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ item }}"
+  loop: "{{ stack_external_networks | unique }}"
+  register: external_network_checks
+  changed_when: false
+  failed_when: false
+  delegate_to: "{{ docker_active_manager }}"
+  run_once: true
+
+- name: Inspect required external secrets
+  command:
+    argv:
+      - docker
+      - secret
+      - inspect
+      - "{{ item }}"
+  loop: "{{ stack_external_secrets | unique }}"
+  register: external_secret_checks
+  changed_when: false
+  failed_when: false
+  delegate_to: "{{ docker_active_manager }}"
+  run_once: true
+
+- name: Fail when external Swarm resources are missing
+  assert:
+    that:
+      - external_network_checks.results | rejectattr('rc', 'equalto', 0) | list | length == 0
+      - external_secret_checks.results | rejectattr('rc', 'equalto', 0) | list | length == 0
+    fail_msg: >-
+      Missing external Swarm resources for stack {{ stack_name }}.
+      Networks: {{ external_network_checks.results | rejectattr('rc', 'equalto', 0) | map(attribute='item') | list }}.
+      Secrets: {{ external_secret_checks.results | rejectattr('rc', 'equalto', 0) | map(attribute='item') | list }}.
+      Create the required resources in the target Swarm before deploying.
   run_once: true
 
 
