@@ -41,3 +41,13 @@ to match its desired count. The default timeout is five minutes
 `docker_stack_convergence_delay: 10`). Override either variable in the inventory
 for stacks that legitimately need a longer startup. If convergence times out,
 the final service and task states are included in the Ansible failure output.
+
+Stacks can declare public endpoint checks in `stack.yml` under `smoke_tests`.
+After convergence, the deploy role checks each hostname resolves from the active
+manager and that its URL returns the declared HTTP status. HTTPS checks also
+verify the certificate chain and hostname by default; set
+`docker_stack_smoke_test_validate_certs: false` in development or testing
+inventories when those environments use staging or self-signed certificates.
+Endpoint checks retry up to six times with a five-second delay by default;
+`docker_stack_smoke_test_retries` and `docker_stack_smoke_test_delay` can tune
+that window.
