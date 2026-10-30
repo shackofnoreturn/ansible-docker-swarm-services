@@ -35,5 +35,9 @@ or correct node labels and availability, before running
 In Semaphore, select the matching environment inventory, set `stack_name`, and
 run `playbook-stack-validate.yml` as the pre-deploy step.
 
-## Todo
-- Move stacks folder to actual stacks repo
+After deploying, the role waits for every stack service's current replica count
+to match its desired count. The default timeout is five minutes
+(`docker_stack_convergence_retries: 30`,
+`docker_stack_convergence_delay: 10`). Override either variable in the inventory
+for stacks that legitimately need a longer startup. If convergence times out,
+the final service and task states are included in the Ansible failure output.

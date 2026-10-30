@@ -1,0 +1,23 @@
+---
+- name: Wait for stack services to converge
+  shell:
+    cmd: |
+      replicas="$(docker stack services --format '{{ "{{.Replicas}}" }}' {{ stack_name | quote }})"
+      if [ -n "$replicas" ] && printf '%s\n' "$replicas" | awk -F/ 'NF != 2 || $1 != $2 { failed=1 } END { exit failed }'; then
+        echo "Stack {{ stack_name }} services converged:"
+        docker stack services {{ stack_name | quote }}
+        exit 0
+      fi
+
+      echo "Stack {{ stack_name }} is still converging. Service status:"
+      docker stack services {{ stack_name | quote }}
+      echo "Recent task status:"
+      docker stack ps --no-trunc --format '{{ "{{.Name}} {{.CurrentState}} {{.Error}}" }}' {{ stack_name | quote }}
+      exit 1
+  register: stack_convergence
+  changed_when: false
+  until: stack_convergence.rc == 0
+  retries: "{{ docker_stack_convergence_retries }}"
+  delay: "{{ docker_stack_convergence_delay }}"
+  delegate_to: "{{ docker_active_manager }}"
+  run_once: true
