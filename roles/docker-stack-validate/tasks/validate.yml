@@ -195,13 +195,25 @@
   delegate_to: "{{ docker_active_manager }}"
   run_once: true
 
+- name: Initialize missing runtime directory list
+  set_fact:
+    missing_runtime_directories: []
+  run_once: true
+
+- name: Collect missing runtime directories
+  set_fact:
+    missing_runtime_directories: "{{ missing_runtime_directories + [item.item] }}"
+  loop: "{{ runtime_checks.results }}"
+  when: not (item.stat.isdir | default(false))
+  run_once: true
+
 - name: Fail when runtime directories are missing
   assert:
     that:
-      - runtime_checks.results | map(attribute='stat') | selectattr('isdir', 'equalto', true) | list | length == runtime_checks.results | length
+      - missing_runtime_directories | length == 0
     fail_msg: >-
       Runtime directories are missing for stack {{ stack_name }}:
-      {{ runtime_checks.results | map(attribute='stat') | rejectattr('isdir', 'equalto', true) | map(attribute='path') | list }}
+      {{ missing_runtime_directories }}
   run_once: true
 
 - name: Display validation result
