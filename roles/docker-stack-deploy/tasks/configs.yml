@@ -23,6 +23,7 @@
     state: directory
     mode: "0700"
   delegate_to: localhost
+  become: false
   run_once: true
   when: (config_files.files | default([]) | selectattr('path', 'search', '\\.j2$') | list | length) > 0
 
@@ -71,5 +72,6 @@
     path: "/tmp/ansible-stack-configs/{{ stack_name }}"
     state: absent
   delegate_to: localhost
+  become: false
   run_once: true
   when: (config_files.files | default([]) | selectattr('path', 'search', '\\.j2$') | list | length) > 0
