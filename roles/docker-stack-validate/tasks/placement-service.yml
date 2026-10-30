@@ -39,4 +39,6 @@
       No Ready and Active Swarm node matches placement constraints for service
       {{ placement_service.key }} in stack {{ stack_name }}:
       {{ placement_service.value.deploy.placement.constraints }}.
-      Check node roles, labels, and availability in the target Swarm.
+      Observed nodes (hostname, role, state, availability, labels):
+      {{ stack_swarm_node_summaries | to_nice_json }}.
+      Compare these labels and values with the Compose constraints.

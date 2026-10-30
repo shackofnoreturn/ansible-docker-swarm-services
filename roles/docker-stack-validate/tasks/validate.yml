@@ -144,6 +144,24 @@
 - name: Parse Swarm node details
   set_fact:
     stack_swarm_nodes: "{{ swarm_node_inspection.stdout_lines | map('from_json') | list }}"
+    stack_swarm_node_summaries: []
+  run_once: true
+
+- name: Summarize Swarm node placement attributes
+  set_fact:
+    stack_swarm_node_summaries: >-
+      {{
+        stack_swarm_node_summaries + [
+          {
+            'hostname': item.Description.Hostname | default(item.ID),
+            'role': item.Spec.Role | default('unknown'),
+            'state': item.Status.State | default('unknown'),
+            'availability': item.Spec.Availability | default('unknown'),
+            'labels': item.Spec.Labels | default({})
+          }
+        ]
+      }}
+  loop: "{{ stack_swarm_nodes }}"
   run_once: true
 
 - name: Validate eligible nodes for services
