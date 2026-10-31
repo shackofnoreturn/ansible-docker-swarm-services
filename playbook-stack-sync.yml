@@ -1,6 +1,21 @@
 ---
-- name: Synchronize Stack Repository
+- name: Gather Reachable Nodes
   hosts: docker
+  gather_facts: false
+  tasks:
+    - name: Check host connectivity
+      ansible.builtin.ping:
+      ignore_unreachable: true
+      register: host_ping
+
+    - name: Group reachable hosts
+      ansible.builtin.group_by:
+        key: "docker_online"
+      when: host_ping is success
+
+
+- name: Synchronize Stack Repository
+  hosts: docker_online
   become: true
   gather_facts: false
 
