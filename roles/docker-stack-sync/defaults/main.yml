@@ -1,0 +1,3 @@
+---
+docker_services_repo: "git@github.com:shackofnoreturn/shackhq-docker-stacks.git"
+docker_services_root: /opt/docker
