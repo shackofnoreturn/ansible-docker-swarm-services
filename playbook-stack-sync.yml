@@ -1,6 +1,6 @@
 ---
 - name: Synchronize Stack Repository
-  hosts: docker-swarm
+  hosts: docker
   become: true
   gather_facts: false
 
