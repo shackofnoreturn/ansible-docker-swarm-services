@@ -1,19 +1,32 @@
 ---
-- name: Gather Reachable Nodes
-  hosts: docker
+# Step 1: Probe SSH reachability from localhost without triggering Ansible connection errors
+- name: Filter reachable Docker nodes
+  hosts: localhost
   gather_facts: false
   tasks:
-    - name: Check host connectivity
-      ansible.builtin.ping:
-      ignore_unreachable: true
-      register: host_ping
+    - name: Check SSH port reachability
+      ansible.builtin.wait_for:
+        host: "{{ hostvars[item].ansible_host | default(item) }}"
+        port: "{{ hostvars[item].ansible_port | default(22) }}"
+        state: started
+        timeout: 3
+      loop: "{{ groups['docker'] }}"
+      register: reachability
+      ignore_errors: true
 
-    - name: Group reachable hosts
-      ansible.builtin.group_by:
-        key: "docker_online"
-      when: host_ping is success
+    - name: Add reachable hosts to docker_online group
+      ansible.builtin.add_host:
+        name: "{{ item.item }}"
+        groups: docker_online
+      loop: "{{ reachability.results }}"
+      when: not (item.failed | default(false))
 
+    - name: Verify at least one Docker host is reachable
+      ansible.builtin.fail:
+        msg: "No Docker nodes are currently reachable on port 22."
+      when: groups['docker_online'] is not defined or groups['docker_online'] | length == 0
 
+# Step 2: Run the synchronization role ONLY against online nodes
 - name: Synchronize Stack Repository
   hosts: docker_online
   become: true
