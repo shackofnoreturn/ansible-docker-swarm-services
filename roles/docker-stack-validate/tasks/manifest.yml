@@ -1,0 +1,5 @@
+---
+- name: Check global manifest exists
+  ansible.builtin.stat:
+    path: "{{ docker_stacks_root }}/global.yml"
+  register: global_manifest

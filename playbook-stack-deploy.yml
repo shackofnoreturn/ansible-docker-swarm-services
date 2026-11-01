@@ -13,4 +13,5 @@
   gather_facts: false
 
   roles:
+    - docker-stack-validate
     - docker-stack-deploy

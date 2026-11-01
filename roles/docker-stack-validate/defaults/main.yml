@@ -1,0 +1,4 @@
+---
+stack_name: ""
+
+stack_path: "/opt/docker/stacks/{{ swarm_environment }}/{{ stack_name }}"
