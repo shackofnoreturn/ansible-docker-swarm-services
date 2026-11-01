@@ -1,0 +1,36 @@
+---
+- name: Read stack Compose files for network definitions
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop: "{{ stack_compose_paths }}"
+  register: stack_compose_network_files
+
+- name: Combine network definitions from Compose files
+  ansible.builtin.set_fact:
+    stack_compose_networks: >-
+      {{
+        stack_compose_networks | default({})
+        | combine(
+            (item.content | b64decode | from_yaml).networks | default({}),
+            recursive=True
+          )
+      }}
+  loop: "{{ stack_compose_network_files.results }}"
+  loop_control:
+    label: "{{ item.source }}"
+
+- name: Create stack networks not managed by Compose
+  community.docker.docker_network:
+    name: "{{ item.value.name | default(item.key) }}"
+    driver: "{{ item.value.driver | default('overlay') }}"
+    scope: swarm
+    attachable: "{{ item.value.attachable | default(omit) }}"
+    state: present
+  loop: "{{ stack_definition.networks | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.value.name | default(item.key) }}"
+  delegate_to: "{{ docker_active_manager }}"
+  run_once: true
+  when: >-
+    item.key not in (stack_compose_networks | default({}))
+    or (stack_compose_networks[item.key].external | default(false) | bool)

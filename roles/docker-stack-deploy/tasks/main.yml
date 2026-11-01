@@ -3,7 +3,7 @@
 
 # - import_tasks: configs.yml
 
-# - import_tasks: networks.yml
+- import_tasks: networks.yml
 
 # - import_tasks: secrets.yml
 
