@@ -5,6 +5,7 @@
   loop: "{{ stack_compose_paths }}"
   register: stack_compose_network_files
 
+
 - name: Combine Compose networks
   ansible.builtin.set_fact:
     stack_compose_networks: >-
@@ -18,6 +19,7 @@
   loop: "{{ stack_compose_network_files.results }}"
   loop_control:
     label: "{{ item.source }}"
+
 
 - name: Create stack networks
   community.docker.docker_network:
