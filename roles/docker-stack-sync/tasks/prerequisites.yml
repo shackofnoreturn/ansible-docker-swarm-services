@@ -1,0 +1,13 @@
+---
+- name: Ensure git installed
+  apt:
+    name: git
+    state: present
+    update_cache: true
+
+
+- name: Ensure root directory
+  file:
+    path: "{{ docker_root }}"
+    state: directory
+    mode: "0755"
