@@ -32,7 +32,6 @@
   environment: "{{ stack_environment }}"
   register: compose_validation
   changed_when: false
-  delegate_to: "{{ docker_active_manager }}"
   run_once: true
 
 - name: Fail on invalid Compose or unresolved variables
