@@ -1,4 +1,6 @@
 ---
 - import_tasks: manifest.yml
 
+- import_tasks: environment.yml
+
 # - import_tasks: validate.yml
