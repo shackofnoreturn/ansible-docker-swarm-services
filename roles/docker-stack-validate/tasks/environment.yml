@@ -8,7 +8,7 @@
         | combine(docker_stack_environment | default({}))
       }}
 
-- name: Build Compose file list
+- name: Compose file list
   ansible.builtin.set_fact:
     stack_compose_files: >-
       {{
@@ -16,6 +16,6 @@
         + (docker_stack_compose_overrides | default({})).get(stack_name, [])
       }}
 
-- name: Build Compose file paths
+- name: Compose file paths
   ansible.builtin.set_fact:
     stack_compose_paths: "{{ stack_compose_files | map('regex_replace', '^', stack_path ~ '/') | list }}"
