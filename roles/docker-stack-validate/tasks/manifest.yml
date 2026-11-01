@@ -2,7 +2,7 @@
 # Global manifest
 - name: Check global manifest
   ansible.builtin.stat:
-    path: "{{ docker_stacks_root }}/global.yml"
+    path: "{{ docker_root }}/global.yml"
   register: global_manifest
 
 - name: Fail if missing
@@ -10,11 +10,11 @@
     that:
       - global_manifest.stat.exists
     fail_msg: >
-      Global manifest {{ docker_stacks_root }}/global.yml does not exist
+      Global manifest {{ docker_root }}/global.yml does not exist
 
 - name: Read global manifest
   ansible.builtin.slurp:
-    src: "{{ docker_stacks_root }}/global.yml"
+    src: "{{ docker_root }}/global.yml"
   register: global_manifest_content
 
 - name: Parse global manifest

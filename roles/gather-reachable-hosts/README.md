@@ -1,6 +1,6 @@
 # Gather Reachable Hosts
 
-A lightweight pre-flight role that checks host connectivity from the control node and dynamically groups only reachable hosts, preventing Ansible and CI tools (like Semaphore) from failing on offline nodes.
+*A lightweight pre-flight role that checks host connectivity from the control node and dynamically groups only reachable hosts, preventing Ansible and CI tools (like Semaphore) from failing on offline nodes.*
 
 ---
 

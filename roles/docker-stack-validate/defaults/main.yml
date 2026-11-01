@@ -1,4 +1,6 @@
 ---
 stack_name: ""
 
-stack_path: "/opt/docker/stacks/{{ swarm_environment }}/{{ stack_name }}"
+docker_root: "/opt/docker"
+
+stack_path: "{{ docker_stacks_root }}/{{ stack_name }}"
