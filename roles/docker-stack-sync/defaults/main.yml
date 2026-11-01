@@ -1,3 +1,4 @@
 ---
-docker_services_repo: "git@github.com:shackofnoreturn/shackhq-docker-stacks.git"
-docker_services_root: /opt/docker
+docker_stacks_repo: "git@github.com:shackofnoreturn/shackhq-docker-stacks.git"
+docker_stacks_root: "/opt/docker"
+docker_stacks_deploy_key_path: "/tmp/docker_services_deploy_key"
