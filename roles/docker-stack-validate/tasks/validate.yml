@@ -23,7 +23,7 @@
 
 
 # Compose configuration
-- name: Validate merged Compose configuration
+- name: Validate Compose configuration
   command:
     cmd: >-
       docker compose
@@ -34,7 +34,7 @@
   changed_when: false
   run_once: true
 
-- name: Fail on invalid Compose or unresolved variables
+- name: Fail on invalid
   assert:
     that:
       - compose_validation.rc == 0
