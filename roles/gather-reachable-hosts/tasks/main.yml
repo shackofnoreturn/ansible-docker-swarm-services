@@ -1,0 +1,26 @@
+---
+- name: Check SSH reachability
+  ansible.builtin.wait_for:
+    host: "{{ hostvars[item].ansible_host | default(item) }}"
+    port: "{{ hostvars[item].ansible_port | default(reachability_port) }}"
+    state: started
+    timeout: "{{ reachability_timeout }}"
+  loop: "{{ groups[target_group] | default([]) }}"
+  register: reachability
+  ignore_errors: true
+
+
+- name: Create online group
+  ansible.builtin.add_host:
+    name: "{{ item.item }}"
+    groups: "{{ online_group }}"
+  loop: "{{ reachability.results | default([]) }}"
+  when: not (item.failed | default(false))
+
+
+- name: Verify host reachability
+  ansible.builtin.fail:
+    msg: "{{ fail_message }}"
+  when:
+    - fail_if_none_reachable | bool
+    - (groups[online_group] is not defined) or (groups[online_group] | length == 0)

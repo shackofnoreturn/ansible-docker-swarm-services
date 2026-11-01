@@ -1,0 +1,14 @@
+---
+# Group in your inventory to check
+target_group: "docker"
+
+# Dynamic in-memory group to create with reachable hosts
+online_group: "docker_online"
+
+# Port and timeout for reachability check
+reachability_port: 22
+reachability_timeout: 3
+
+# Safety check: fail the playbook if no hosts are online
+fail_if_none_reachable: true
+fail_message: "No nodes in group '{{ target_group }}' are reachable on port {{ reachability_port }}."

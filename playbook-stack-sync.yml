@@ -2,28 +2,9 @@
 - name: Gather Reachable Nodes
   hosts: localhost
   gather_facts: false
-  tasks:
-    - name: Check SSH port reachability
-      ansible.builtin.wait_for:
-        host: "{{ hostvars[item].ansible_host | default(item) }}"
-        port: "{{ hostvars[item].ansible_port | default(22) }}"
-        state: started
-        timeout: 3
-      loop: "{{ groups['docker'] }}"
-      register: reachability
-      ignore_errors: true
 
-    - name: Create Online Group
-      ansible.builtin.add_host:
-        name: "{{ item.item }}"
-        groups: docker_online
-      loop: "{{ reachability.results }}"
-      when: not (item.failed | default(false))
-
-    - name: Verify Online Group
-      ansible.builtin.fail:
-        msg: "No Docker nodes are currently reachable on port 22."
-      when: groups['docker_online'] is not defined or groups['docker_online'] | length == 0
+  roles:
+    - gather-reachable-hosts
 
 
 - name: Synchronize Stack Repository
