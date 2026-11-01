@@ -21,14 +21,14 @@
 
 - name: Create stack networks
   community.docker.docker_network:
-    name: "{{ item.value.name | default(item.key) }}"
+    name: "{{ stack_environment.get(item.value.name, item.value.name) if item.value.name is defined else item.key }}"
     driver: "{{ item.value.driver | default('overlay') }}"
     scope: swarm
     attachable: "{{ item.value.attachable | default(omit) }}"
     state: present
   loop: "{{ stack_definition.networks | default({}) | dict2items }}"
   loop_control:
-    label: "{{ item.value.name | default(item.key) }}"
+    label: "{{ stack_environment.get(item.value.name, item.value.name) if item.value.name is defined else item.key }}"
   run_once: true
   when: >-
     item.key not in (stack_compose_networks | default({}))
