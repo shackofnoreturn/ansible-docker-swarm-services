@@ -1,7 +1,7 @@
 ---
 - name: Create data directories
   file:
-    path: "{{ item }}"
+    path: "{{ item if item.startswith('/') else [docker_data_root, item] | path_join }}"
     state: directory
     owner: root
     group: root
