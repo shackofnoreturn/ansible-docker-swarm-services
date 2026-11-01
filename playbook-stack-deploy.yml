@@ -1,0 +1,16 @@
+---
+- name: Gather Reachable Nodes
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - gather-reachable-hosts
+
+
+- name: Deploy Docker Stack
+  hosts: docker_online
+  become: true
+  gather_facts: false
+
+  roles:
+    - docker-stack-deploy
