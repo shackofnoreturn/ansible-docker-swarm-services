@@ -1,5 +1,5 @@
 ---
-- name: Create application data directories
+- name: Create data directories
   file:
     path: "{{ item }}"
     state: directory
