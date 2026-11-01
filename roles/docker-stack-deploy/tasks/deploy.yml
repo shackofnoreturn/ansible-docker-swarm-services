@@ -4,5 +4,4 @@
     name: "{{ stack_name }}"
     compose: "{{ stack_compose_paths }}"
   environment: "{{ stack_environment }}"
-  delegate_to: "{{ docker_active_manager }}"
   run_once: true
