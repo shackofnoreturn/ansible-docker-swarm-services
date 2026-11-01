@@ -4,3 +4,6 @@ stack_name: ""
 stack_path: "{{ docker_stacks_root }}/{{ stack_name }}"
 
 docker_data_root: "{{ docker_root }}/data/{{ swarm_environment }}"
+
+stack_convergence_retries: 30
+stack_convergence_delay: 10

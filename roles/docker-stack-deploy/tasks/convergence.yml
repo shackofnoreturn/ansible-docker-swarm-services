@@ -1,0 +1,22 @@
+---
+- name: Wait for stack services to converge
+  ansible.builtin.command:
+    argv:
+      - docker
+      - stack
+      - services
+      - --format
+      - "{{ '{{.Replicas}}' }}"
+      - "{{ stack_name }}"
+  register: stack_service_status
+  changed_when: false
+  until:
+    - stack_service_status.stdout_lines | length > 0
+    - >-
+      stack_service_status.stdout_lines
+      | select('match', '^([1-9][0-9]*)/\\1$')
+      | list
+      | length == stack_service_status.stdout_lines | length
+  retries: "{{ stack_convergence_retries }}"
+  delay: "{{ stack_convergence_delay }}"
+  run_once: true
