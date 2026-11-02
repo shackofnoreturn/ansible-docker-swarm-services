@@ -3,7 +3,6 @@
   community.docker.docker_stack:
     name: "{{ stack_name }}"
     compose: "{{ stack_compose_paths }}"
-    detach: false
     prune: true
     state: present
   environment: "{{ stack_environment }}"
