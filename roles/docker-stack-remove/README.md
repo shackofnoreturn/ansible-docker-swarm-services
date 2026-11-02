@@ -14,9 +14,9 @@
 
 ## Inputs
 
-This role is designed to run against Docker nodes (for example, `hosts: docker_online`). Docker operations are delegated to `docker_active_manager` and run once.
+This role is designed to run against target Docker nodes (e.g., `hosts: docker_online`).
 
-### Role Variables (`defaults/main.yml`)
+### Variables (`defaults/main.yml`)
 
 | Variable | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
@@ -30,8 +30,8 @@ This role is designed to run against Docker nodes (for example, `hosts: docker_o
 | `stack_remove_delay` | integer | `2` | Seconds between service-removal checks. |
 | `remove_runtime_data` | boolean | `false` | Delete `{{ docker_data_root }}/{{ stack_name }}` after the stack is removed. |
 | `docker_root` | string | `"/opt/docker"` | Root path used to derive `docker_data_root`. |
-| `swarm_environment` | string | `""` | Environment directory below `docker_root/data`. |
-| `docker_data_root` | string | `"{{ docker_root }}/data/{{ swarm_environment }}"` | Root directory for runtime data; can be overridden. |
+| `environment` | string | `""` | Environment directory below `docker_root/data`. |
+| `docker_data_root` | string | `"{{ docker_root }}/data/{{ env }}"` | Root directory for runtime data; can be overridden. |
 
 ### Safety Notes
 
@@ -79,7 +79,7 @@ This role is designed to run against Docker nodes (for example, `hosts: docker_o
       - cloudflare_api_token
       - traefik_dashboard_users
     remove_runtime_data: true
-    swarm_environment: development
+    environment: development
 
   roles:
     - docker-stack-remove

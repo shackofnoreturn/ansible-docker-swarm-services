@@ -17,7 +17,7 @@
 
 This role is designed to run against target Docker nodes (e.g., `hosts: docker_online`).
 
-### Role Variables (`defaults/main.yml`)
+### Variables (`defaults/main.yml`)
 
 | Variable | Type | Default | Description |
 | :--- | :--- | :--- | :--- |

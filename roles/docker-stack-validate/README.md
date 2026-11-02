@@ -34,7 +34,7 @@ This role is designed to run against target Docker nodes (e.g., `hosts: docker_o
 | `docker_root` | string | `"/opt/docker"` | Base directory where the stack repository and `global.yml` reside. |
 | `stack_path` | string | `"{{ docker_stacks_root }}/{{ stack_name }}"` | Absolute path to the stack directory containing `stack.yml` and compose files. |
 
-### Inventory / Group Variables
+### Variables
 
 These variables are typically provided via inventory `group_vars` (e.g., `group_vars/docker.yml`):
 
