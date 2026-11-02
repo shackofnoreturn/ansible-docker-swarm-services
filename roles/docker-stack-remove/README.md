@@ -77,7 +77,7 @@ This role is designed to run against target Docker nodes (e.g., `hosts: docker_o
     remove_secrets: true
     docker_secrets_to_remove:
       - cloudflare_api_token
-      - traefik_dashboard_users
+      - dashboard_users
     remove_runtime_data: true
     environment: development
 
