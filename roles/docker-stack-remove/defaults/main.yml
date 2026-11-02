@@ -1,0 +1,13 @@
+---
+stack_name: ""
+
+remove_configs: false
+remove_secrets: false
+remove_runtime_data: false
+
+docker_secrets_to_remove: []
+stack_remove_retries: 30
+stack_remove_delay: 2
+
+docker_root: "/opt/docker"
+docker_data_root: "{{ docker_root }}/data/{{ swarm_environment }}"

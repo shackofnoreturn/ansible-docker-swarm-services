@@ -1,0 +1,39 @@
+---
+- name: Remove Docker stack
+  community.docker.docker_stack:
+    name: "{{ stack_name }}"
+    state: absent
+  run_once: true
+
+
+- name: Wait for removal
+  ansible.builtin.command:
+    argv:
+      - docker
+      - service
+      - ls
+      - --filter
+      - "label=com.docker.stack.namespace={{ stack_name }}"
+      - --format
+      - "{{ '{{.ID}}' }}"
+  register: removed_stack_services
+  changed_when: false
+  until: removed_stack_services.stdout_lines | length == 0
+  retries: "{{ stack_remove_retries }}"
+  delay: "{{ stack_remove_delay }}"
+
+
+- name: Remove Docker secrets
+  community.docker.docker_secret:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ docker_secrets_to_remove }}"
+  when: remove_secrets | bool
+  run_once: true
+
+
+- name: Remove runtime data
+  ansible.builtin.file:
+    path: "{{ docker_data_root }}/{{ stack_name }}"
+    state: absent
+  when: remove_runtime_data | bool
