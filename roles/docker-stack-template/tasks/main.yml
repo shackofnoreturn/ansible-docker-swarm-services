@@ -50,6 +50,7 @@
       ansible.builtin.copy:
         src: "{{ stack_jinja_temporary_directory.path }}/{{ stack_jinja_index }}.rendered"
         dest: "{{ item.path | regex_replace('[.](j2|jinja2?)$', '') }}"
+        remote_src: true
         mode: "{{ item.mode }}"
       loop: "{{ stack_jinja_templates.files }}"
       loop_control:
@@ -62,8 +63,6 @@
       ansible.builtin.file:
         path: "{{ stack_jinja_temporary_directory.path }}"
         state: absent
-      delegate_to: localhost
-      become: false
       when:
         - stack_jinja_temporary_directory is defined
         - stack_jinja_temporary_directory.path is defined
