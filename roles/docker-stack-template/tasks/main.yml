@@ -1,0 +1,69 @@
+---
+- name: Find Jinja templates
+  ansible.builtin.find:
+    paths: "{{ stack_path }}"
+    patterns:
+      - "*.j2"
+      - "*.jinja"
+      - "*.jinja2"
+    recurse: true
+    file_type: file
+  register: stack_jinja_templates
+
+
+- name: Render Jinja templates
+  when: stack_jinja_templates.matched | int > 0
+  block:
+
+    - name: Create temporary directory
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: ansible-stack-template-
+      become: false
+      register: stack_jinja_temporary_directory
+
+
+    - name: Fetch stack templates
+      ansible.builtin.fetch:
+        src: "{{ item.path }}"
+        dest: "{{ stack_jinja_temporary_directory.path }}/{{ stack_jinja_index }}.j2"
+        flat: true
+      loop: "{{ stack_jinja_templates.files }}"
+      loop_control:
+        index_var: stack_jinja_index
+        label: "{{ item.path }}"
+
+
+    - name: Render templates
+      ansible.builtin.template:
+        src: "{{ stack_jinja_temporary_directory.path }}/{{ stack_jinja_index }}.j2"
+        dest: "{{ stack_jinja_temporary_directory.path }}/{{ stack_jinja_index }}.rendered"
+        mode: "0600"
+      become: false
+      loop: "{{ stack_jinja_templates.files }}"
+      loop_control:
+        index_var: stack_jinja_index
+        label: "{{ item.path }}"
+
+
+    - name: Copy rendered templates
+      ansible.builtin.copy:
+        src: "{{ stack_jinja_temporary_directory.path }}/{{ stack_jinja_index }}.rendered"
+        dest: "{{ item.path | regex_replace('[.](j2|jinja2?)$', '') }}"
+        mode: "{{ item.mode }}"
+      loop: "{{ stack_jinja_templates.files }}"
+      loop_control:
+        index_var: stack_jinja_index
+        label: "{{ item.path }}"
+
+
+  always:
+    - name: Remove temporary directory
+      ansible.builtin.file:
+        path: "{{ stack_jinja_temporary_directory.path }}"
+        state: absent
+      delegate_to: localhost
+      become: false
+      when:
+        - stack_jinja_temporary_directory is defined
+        - stack_jinja_temporary_directory.path is defined

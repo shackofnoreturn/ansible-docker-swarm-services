@@ -14,6 +14,7 @@
 
   roles:
     - docker-stack-sync
+    - docker-stack-template
     - docker-stack-validate
     - docker-stack-remove
     - docker-stack-deploy
