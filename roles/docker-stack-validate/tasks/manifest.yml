@@ -1,4 +1,10 @@
 ---
+# Stack name
+- name: Stack name
+  ansible.builtin.debug:
+    var: stack_name
+
+
 # Global manifest
 - name: Check global manifest
   ansible.builtin.stat:
