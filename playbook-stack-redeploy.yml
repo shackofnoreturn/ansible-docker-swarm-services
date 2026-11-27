@@ -1,0 +1,20 @@
+---
+- name: Gather Reachable Nodes
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - gather-reachable-hosts
+
+
+- name: Redeploy Docker Stack
+  hosts: docker_online
+  become: true
+  gather_facts: false
+
+  roles:
+    - docker-stack-sync
+    - docker-stack-template
+    - docker-stack-validate
+    - docker-stack-remove
+    - docker-stack-deploy

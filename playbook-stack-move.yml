@@ -1,0 +1,21 @@
+---
+- name: Gather Reachable Nodes
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - gather-reachable-hosts
+
+
+- name: Move Docker Stack
+  hosts: docker_online
+  become: true
+  gather_facts: false
+
+  roles:
+  # TODO: What roles below can go without breaking Move?
+    - docker-stack-sync
+    - docker-stack-template
+    - docker-stack-validate
+    - docker-stack-backup
+    - docker-stack-restore
