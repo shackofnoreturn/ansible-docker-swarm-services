@@ -26,10 +26,9 @@
     mode: "0755"
 
 - name: Archive service data
-  ansible.builtin.archive:
+  community.general.archive:
     path: "{{ service_data_path }}"
     dest: "{{ service_backup_file }}"
     format: zip
     mode: "0644"
-
 

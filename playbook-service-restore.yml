@@ -1,0 +1,46 @@
+---
+- name: Gather Reachable Nodes
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - gather-reachable-hosts
+
+- name: Locate Service Host
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Require a service name
+      ansible.builtin.assert:
+        that:
+          - service_name is defined
+          - service_name | length > 0
+        fail_msg: "service_name must be set to locate the service host."
+
+    - name: Find hosts labeled for the service
+      ansible.builtin.set_fact:
+        service_restore_hosts: "{{ service_restore_hosts | default([]) + [item] }}"
+      loop: "{{ groups['docker_online'] | default([]) }}"
+      when: hostvars[item][service_name] | default(false) | bool
+
+    - name: Require exactly one service host
+      ansible.builtin.assert:
+        that:
+          - service_restore_hosts | default([]) | length == 1
+        fail_msg: >-
+          Expected exactly one reachable host labeled {{ service_name }}: true,
+          found {{ service_restore_hosts | default([]) | length }}.
+
+    - name: Add service host to restore target group
+      ansible.builtin.add_host:
+        name: "{{ service_restore_hosts[0] }}"
+        groups: docker_service_restore
+
+- name: Restore Docker Service Data
+  hosts: docker_service_restore
+  become: true
+  gather_facts: false
+
+  roles:
+    - docker-service-restore
+

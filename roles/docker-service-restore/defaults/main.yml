@@ -1,0 +1,13 @@
+service_name: ""
+stack_name: ""
+env: ""
+
+docker_root: "/opt/docker"
+docker_data_root: "{{ docker_root }}/data/{{ env }}"
+service_data_path: "{{ docker_data_root }}/{{ service_name }}"
+
+service_backup_root: "/mnt/nfs/fil-p001/backups/docker/data"
+service_backup_path: "{{ service_backup_root }}/{{ env }}/{{ stack_name }}/{{ service_name }}"
+service_restore_file: ""
+service_restore_pattern: "data_{{ env }}_{{ stack_name }}_{{ service_name }}_*.zip"
+

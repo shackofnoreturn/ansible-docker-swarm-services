@@ -1,0 +1,72 @@
+---
+- name: Require service restore inputs
+  ansible.builtin.assert:
+    that:
+      - service_name | length > 0
+      - stack_name | length > 0
+      - env | length > 0
+    fail_msg: "service_name, stack_name, and env must be set for a service restore."
+
+- name: Check service backup directory
+  ansible.builtin.stat:
+    path: "{{ service_backup_path }}"
+  register: service_restore_backup_directory
+
+- name: Require an existing service backup directory
+  ansible.builtin.assert:
+    that:
+      - service_restore_backup_directory.stat.exists
+      - service_restore_backup_directory.stat.isdir
+    fail_msg: "Service backup directory {{ service_backup_path }} does not exist."
+
+- name: Find matching service backups
+  ansible.builtin.find:
+    paths: "{{ service_backup_path }}"
+    patterns: "{{ service_restore_pattern }}"
+    file_type: file
+  register: service_restore_archives
+  when: service_restore_file | length == 0
+
+- name: Require a matching service backup
+  ansible.builtin.assert:
+    that:
+      - service_restore_file | length > 0 or service_restore_archives.matched | int > 0
+    fail_msg: >-
+      No backup archive matching {{ service_restore_pattern }} was found in
+      {{ service_backup_path }}.
+
+- name: Select the newest service backup
+  ansible.builtin.set_fact:
+    service_restore_selected_archive: "{{ (service_restore_archives.files | sort(attribute='mtime') | last).path }}"
+  when: service_restore_file | length == 0
+
+- name: Select the requested service backup
+  ansible.builtin.set_fact:
+    service_restore_selected_archive: "{{ service_restore_file }}"
+  when: service_restore_file | length > 0
+
+- name: Check selected service backup
+  ansible.builtin.stat:
+    path: "{{ service_restore_selected_archive }}"
+  register: service_restore_archive_stat
+
+- name: Require an existing backup archive
+  ansible.builtin.assert:
+    that:
+      - service_restore_archive_stat.stat.exists
+      - service_restore_archive_stat.stat.isreg
+    fail_msg: "Service backup archive {{ service_restore_selected_archive }} does not exist."
+
+- name: Create service data directory
+  ansible.builtin.file:
+    path: "{{ service_data_path }}"
+    state: directory
+    mode: "0755"
+
+- name: Restore service data
+  ansible.builtin.unarchive:
+    src: "{{ service_restore_selected_archive }}"
+    dest: "{{ service_data_path }}"
+    remote_src: true
+    keep_newer: false
+

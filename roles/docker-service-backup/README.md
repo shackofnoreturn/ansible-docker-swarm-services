@@ -2,6 +2,8 @@
 
 Backs up one service's data directory as a ZIP archive on the NFS backup share. The service runs on the reachable inventory host whose variable named after `service_name` is set to `true`.
 
+This role uses the `community.general.archive` module. Install its collection with `ansible-galaxy collection install -r requirements.yml`.
+
 ## Variables
 
 | Variable | Default | Description |
@@ -23,5 +25,4 @@ Run `playbook-service-backup.yml` with `service_name`, `stack_name`, and `env` s
 ```sh
 ansible-playbook playbook-service-backup.yml -e "service_name=database stack_name=app env=production"
 ```
-
 
