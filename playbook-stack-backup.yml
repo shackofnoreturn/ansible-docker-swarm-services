@@ -1,0 +1,65 @@
+---
+- name: Gather Reachable Nodes
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - gather-reachable-hosts
+
+- name: Prepare Docker Stack Services
+  hosts: docker_online
+  become: true
+  gather_facts: false
+
+  roles:
+    - docker-stack-sync
+    - docker-stack-template
+    - docker-stack-validate
+
+  tasks:
+    - name: Expose Compose services for stack operations
+      ansible.builtin.set_fact:
+        stack_service_names: "{{ (compose_validation.stdout | from_json).services | dict2items | map(attribute='key') | list }}"
+      delegate_to: localhost
+      delegate_facts: true
+      run_once: true
+
+- name: Validate Stack Service Placement
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Require services in the stack
+      ansible.builtin.assert:
+        that:
+          - stack_service_names | length > 0
+        fail_msg: "No Compose services were found for stack {{ stack_name }}."
+
+    - name: Require one reachable host per service
+      ansible.builtin.assert:
+        that:
+          - >-
+            groups['docker_online']
+            | map('extract', hostvars)
+            | selectattr(item, 'defined')
+            | selectattr(item, 'truthy')
+            | list
+            | length == 1
+        fail_msg: "Expected exactly one reachable host labeled {{ item }}: true."
+      loop: "{{ stack_service_names }}"
+
+- name: Backup Docker Stack Services
+  hosts: docker_online
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Back up services assigned to this node
+      ansible.builtin.include_role:
+        name: docker-service-backup
+      vars:
+        service_name: "{{ stack_service_name }}"
+      loop: "{{ hostvars['localhost'].stack_service_names }}"
+      loop_control:
+        loop_var: stack_service_name
+        label: "{{ stack_service_name }}"
+      when: hostvars[inventory_hostname][stack_service_name] | default(false) | bool
+
