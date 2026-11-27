@@ -1,0 +1,35 @@
+---
+- name: Require service backup inputs
+  ansible.builtin.assert:
+    that:
+      - service_name | length > 0
+      - stack_name | length > 0
+      - env | length > 0
+    fail_msg: "service_name, stack_name, and env must be set for a service backup."
+
+- name: Check service data directory
+  ansible.builtin.stat:
+    path: "{{ service_data_path }}"
+  register: service_backup_source
+
+- name: Require an existing service data directory
+  ansible.builtin.assert:
+    that:
+      - service_backup_source.stat.exists
+      - service_backup_source.stat.isdir
+    fail_msg: "Service data directory {{ service_data_path }} does not exist."
+
+- name: Create service backup directory
+  ansible.builtin.file:
+    path: "{{ service_backup_path }}"
+    state: directory
+    mode: "0755"
+
+- name: Archive service data
+  ansible.builtin.archive:
+    path: "{{ service_data_path }}"
+    dest: "{{ service_backup_file }}"
+    format: zip
+    mode: "0644"
+
+

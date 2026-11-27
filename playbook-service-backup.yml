@@ -1,0 +1,40 @@
+---
+- name: Gather Reachable Nodes
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - gather-reachable-hosts
+
+- name: Locate Service Host
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Find hosts labeled for the service
+      ansible.builtin.set_fact:
+        service_backup_hosts: "{{ service_backup_hosts | default([]) + [item] }}"
+      loop: "{{ groups['docker_online'] | default([]) }}"
+      when: hostvars[item][service_name] | default(false) | bool
+
+    - name: Require exactly one service host
+      ansible.builtin.assert:
+        that:
+          - service_backup_hosts | default([]) | length == 1
+        fail_msg: >-
+          Expected exactly one reachable host labeled {{ service_name }}: true,
+          found {{ service_backup_hosts | default([]) | length }}.
+
+    - name: Add service host to backup target group
+      ansible.builtin.add_host:
+        name: "{{ service_backup_hosts[0] }}"
+        groups: docker_service_backup
+
+- name: Backup Docker Service Data
+  hosts: docker_service_backup
+  become: true
+  gather_facts: false
+
+  roles:
+    - docker-service-backup
+
+
