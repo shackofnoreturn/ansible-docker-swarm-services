@@ -1,0 +1,15 @@
+---
+- name: Gather Reachable Nodes
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - gather-reachable-hosts
+
+- name: Move Docker Service Placement
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - docker-service-move
+

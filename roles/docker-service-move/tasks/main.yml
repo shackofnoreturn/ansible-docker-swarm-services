@@ -1,0 +1,69 @@
+---
+- name: Require service move inputs
+  ansible.builtin.assert:
+    that:
+      - service_name | length > 0
+      - service_target_host | length > 0
+      - docker_swarm_manager_host | length > 0
+      - docker_swarm_manager_host in hostvars
+    fail_msg: >-
+      service_name, service_target_host, and an inventory host in
+      docker_swarm_manager_host are required.
+
+- name: Require reachable service target
+  ansible.builtin.assert:
+    that:
+      - service_target_host in groups[service_move_target_group] | default([])
+    fail_msg: >-
+      Destination host {{ service_target_host }} is not in the reachable
+      {{ service_move_target_group }} group.
+
+- name: Find current service hosts
+  ansible.builtin.set_fact:
+    service_move_source_hosts: "{{ service_move_source_hosts | default([]) + [item] }}"
+  loop: "{{ groups[service_move_target_group] | default([]) }}"
+  when: hostvars[item][service_name] | default(false) | bool
+
+- name: Require exactly one current service host
+  ansible.builtin.assert:
+    that:
+      - service_move_source_hosts | default([]) | length == 1
+    fail_msg: >-
+      Expected exactly one reachable host labeled {{ service_name }}: true,
+      found {{ service_move_source_hosts | default([]) | length }}.
+
+- name: Require a different destination host
+  ansible.builtin.assert:
+    that:
+      - service_target_host != service_move_source_hosts[0]
+    fail_msg: "Service {{ service_name }} is already assigned to {{ service_target_host }}."
+
+- name: Resolve Swarm node names
+  ansible.builtin.set_fact:
+    service_move_source_node: "{{ hostvars[service_move_source_hosts[0]].docker_swarm_node_name | default(service_move_source_hosts[0]) }}"
+    service_move_target_node: "{{ hostvars[service_target_host].docker_swarm_node_name | default(service_target_host) }}"
+
+- name: Add service label to destination node
+  ansible.builtin.command:
+    argv:
+      - docker
+      - node
+      - update
+      - --label-add
+      - "{{ service_name }}=true"
+      - "{{ service_move_target_node }}"
+  delegate_to: "{{ docker_swarm_manager_host }}"
+  changed_when: true
+
+- name: Remove service label from previous node
+  ansible.builtin.command:
+    argv:
+      - docker
+      - node
+      - update
+      - --label-rm
+      - "{{ service_name }}"
+      - "{{ service_move_source_node }}"
+  delegate_to: "{{ docker_swarm_manager_host }}"
+  changed_when: true
+

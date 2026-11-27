@@ -1,0 +1,6 @@
+service_name: ""
+service_target_host: ""
+docker_swarm_manager_host: ""
+
+service_move_target_group: "docker_online"
+
