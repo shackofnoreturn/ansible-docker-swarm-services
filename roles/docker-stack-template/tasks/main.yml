@@ -11,6 +11,30 @@
   register: stack_jinja_templates
 
 
+- name: Check shared template directory
+  ansible.builtin.stat:
+    path: "{{ docker_root }}/templates"
+  register: stack_jinja_shared_template_directory
+
+
+- name: Find shared Jinja templates
+  ansible.builtin.find:
+    paths: "{{ docker_root }}/templates"
+    patterns:
+      - "*.j2"
+      - "*.jinja"
+      - "*.jinja2"
+    recurse: true
+    file_type: file
+  register: stack_jinja_shared_templates
+  when: stack_jinja_shared_template_directory.stat.isdir | default(false)
+
+
+- name: Combine stack and shared template paths
+  ansible.builtin.set_fact:
+    stack_jinja_all_templates: "{{ stack_jinja_templates.files + (stack_jinja_shared_templates.files | default([])) }}"
+
+
 - name: Render Jinja templates
   when: stack_jinja_templates.matched | int > 0
   block:
@@ -23,38 +47,48 @@
       register: stack_jinja_temporary_directory
 
 
-    - name: Fetch stack templates
+    - name: Create template workspace directories
+      ansible.builtin.file:
+        path: "{{ stack_jinja_temporary_directory.path }}/{{ (item.path | replace(docker_root ~ '/', '', 1)) | dirname }}"
+        state: directory
+        mode: "0700"
+      loop: "{{ stack_jinja_all_templates }}"
+      loop_control:
+        label: "{{ item.path }}"
+
+
+    - name: Fetch stack and shared templates
       ansible.builtin.fetch:
         src: "{{ item.path }}"
-        dest: "{{ stack_jinja_temporary_directory.path }}/{{ stack_jinja_index }}.j2"
+        dest: "{{ stack_jinja_temporary_directory.path }}/{{ item.path | replace(docker_root ~ '/', '', 1) }}"
         flat: true
-      loop: "{{ stack_jinja_templates.files }}"
+      loop: "{{ stack_jinja_all_templates }}"
       loop_control:
-        index_var: stack_jinja_index
         label: "{{ item.path }}"
 
 
     - name: Render templates
       ansible.builtin.template:
-        src: "{{ stack_jinja_temporary_directory.path }}/{{ stack_jinja_index }}.j2"
-        dest: "{{ stack_jinja_temporary_directory.path }}/{{ stack_jinja_index }}.rendered"
+        src: "{{ stack_jinja_temporary_directory.path }}/{{ item.path | replace(docker_root ~ '/', '', 1) }}"
+        dest: "{{ stack_jinja_temporary_directory.path }}/{{ item.path | replace(docker_root ~ '/', '', 1) }}.rendered"
         mode: "0600"
+      vars:
+        ansible_search_path:
+          - "{{ stack_jinja_temporary_directory.path }}"
       become: false
       loop: "{{ stack_jinja_templates.files }}"
       loop_control:
-        index_var: stack_jinja_index
         label: "{{ item.path }}"
 
 
     - name: Copy rendered templates
       ansible.builtin.copy:
-        src: "{{ stack_jinja_temporary_directory.path }}/{{ stack_jinja_index }}.rendered"
+        src: "{{ stack_jinja_temporary_directory.path }}/{{ item.path | replace(docker_root ~ '/', '', 1) }}.rendered"
         dest: "{{ item.path | regex_replace('[.](j2|jinja2?)$', '') }}"
         remote_src: true
         mode: "{{ item.mode }}"
       loop: "{{ stack_jinja_templates.files }}"
       loop_control:
-        index_var: stack_jinja_index
         label: "{{ item.path }}"
 
 
@@ -66,3 +100,4 @@
       when:
         - stack_jinja_temporary_directory is defined
         - stack_jinja_temporary_directory.path is defined
+
