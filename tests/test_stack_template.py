@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import tempfile
 import unittest
 
@@ -25,13 +26,46 @@ class StackTemplateTests(unittest.TestCase):
         self.assertEqual(shared_find["when"], "stack_jinja_shared_template_directory.stat.isdir | default(false)")
 
     def test_fetch_and_render_keep_repository_relative_paths(self):
-        fetch = next(task for task in self.tasks[4]["block"] if task["name"] == "Fetch stack and shared templates")
-        source = next(task for task in self.tasks[4]["block"] if task["name"] == "Render templates")
+        block = self.tasks[4]["block"]
+        fetch = next(task for task in block if task["name"] == "Fetch stack and shared templates")
+        include_directory = next(task for task in block if task["name"] == "Create shared include directories beside stack templates")
+        stage = next(task for task in block if task["name"] == "Stage shared templates beside stack templates")
+        source = next(task for task in block if task["name"] == "Render templates")
         self.assertEqual(fetch["loop"], "{{ stack_jinja_all_templates }}")
         self.assertIn("replace(docker_root ~ '/', '', 1)", fetch["ansible.builtin.fetch"]["dest"])
         self.assertIn("replace(docker_root ~ '/', '', 1)", source["ansible.builtin.template"]["src"])
-        self.assertEqual(source["vars"]["ansible_search_path"], ["{{ stack_jinja_temporary_directory.path }}"])
         self.assertEqual(source["loop"], "{{ stack_jinja_templates.files }}")
+        self.assertIn("/templates/", stage["ansible.builtin.copy"]["dest"])
+        self.assertEqual(stage["delegate_to"], "localhost")
+        self.assertIn("product(stack_jinja_shared_templates.files", stage["loop"])
+        path_environment = Environment()
+        path_environment.filters["dirname"] = os.path.dirname
+        include_directory_path = path_environment.from_string(
+            include_directory["ansible.builtin.file"]["path"]
+        ).render(
+            stack_jinja_temporary_directory={"path": "/tmp/render"},
+            item=(
+                {"path": "/opt/docker/stacks/development/traefik/compose.yml.j2"},
+                {"path": "/opt/docker/templates/common/logging.yml.j2"},
+            ),
+            docker_root="/opt/docker",
+        )
+        self.assertEqual(
+            include_directory_path,
+            "/tmp/render/stacks/development/traefik/templates/common",
+        )
+        staged_path = path_environment.from_string(stage["ansible.builtin.copy"]["dest"]).render(
+            stack_jinja_temporary_directory={"path": "/tmp/render"},
+            item=(
+                {"path": "/opt/docker/stacks/development/traefik/compose.yml.j2"},
+                {"path": "/opt/docker/templates/common/logging.yml.j2"},
+            ),
+            docker_root="/opt/docker",
+        )
+        self.assertEqual(
+            staged_path,
+            "/tmp/render/stacks/development/traefik/templates/common/logging.yml.j2",
+        )
         fetched_path = Environment().from_string(fetch["ansible.builtin.fetch"]["dest"]).render(
             stack_jinja_temporary_directory={"path": "/tmp/render"},
             item={"path": "/opt/docker/stacks/dev/app/compose.yml.j2"},
@@ -44,17 +78,18 @@ class StackTemplateTests(unittest.TestCase):
             repository_root = Path(temporary_directory)
             stack_template = repository_root / "stacks/development/traefik/compose.yml.j2"
             shared_template = repository_root / "templates/common/logging.yml.j2"
+            staged_shared_template = stack_template.parent / "templates/common/logging.yml.j2"
             stack_template.parent.mkdir(parents=True)
             shared_template.parent.mkdir(parents=True)
+            staged_shared_template.parent.mkdir(parents=True)
             stack_template.write_text(
                 "{% include 'templates/common/logging.yml.j2' %}",
                 encoding="utf-8",
             )
             shared_template.write_text("logging: local", encoding="utf-8")
+            staged_shared_template.write_text(shared_template.read_text(encoding="utf-8"), encoding="utf-8")
 
-            environment = Environment(
-                loader=FileSystemLoader([str(stack_template.parent), str(repository_root)])
-            )
+            environment = Environment(loader=FileSystemLoader(str(stack_template.parent)))
             rendered = environment.get_template(stack_template.name).render()
 
         self.assertEqual(rendered, "logging: local")

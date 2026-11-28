@@ -67,14 +67,34 @@
         label: "{{ item.path }}"
 
 
+    - name: Create shared include directories beside stack templates
+      ansible.builtin.file:
+        path: "{{ stack_jinja_temporary_directory.path }}/{{ (item.0.path | replace(docker_root ~ '/', '', 1) | dirname) }}/templates/{{ (item.1.path | replace(docker_root ~ '/templates/', '', 1) | dirname) }}"
+        state: directory
+        mode: "0700"
+      delegate_to: localhost
+      loop: "{{ stack_jinja_templates.files | product(stack_jinja_shared_templates.files | default([])) | list }}"
+      loop_control:
+        label: "{{ item.0.path }} <- {{ item.1.path }}"
+
+
+    - name: Stage shared templates beside stack templates
+      ansible.builtin.copy:
+        src: "{{ stack_jinja_temporary_directory.path }}/{{ item.1.path | replace(docker_root ~ '/', '', 1) }}"
+        dest: "{{ stack_jinja_temporary_directory.path }}/{{ (item.0.path | replace(docker_root ~ '/', '', 1) | dirname) }}/templates/{{ item.1.path | replace(docker_root ~ '/templates/', '', 1) }}"
+        remote_src: false
+        mode: "{{ item.1.mode }}"
+      delegate_to: localhost
+      loop: "{{ stack_jinja_templates.files | product(stack_jinja_shared_templates.files | default([])) | list }}"
+      loop_control:
+        label: "{{ item.0.path }} <- {{ item.1.path }}"
+
+
     - name: Render templates
       ansible.builtin.template:
         src: "{{ stack_jinja_temporary_directory.path }}/{{ item.path | replace(docker_root ~ '/', '', 1) }}"
         dest: "{{ stack_jinja_temporary_directory.path }}/{{ item.path | replace(docker_root ~ '/', '', 1) }}.rendered"
         mode: "0600"
-      vars:
-        ansible_search_path:
-          - "{{ stack_jinja_temporary_directory.path }}"
       become: false
       loop: "{{ stack_jinja_templates.files }}"
       loop_control:
