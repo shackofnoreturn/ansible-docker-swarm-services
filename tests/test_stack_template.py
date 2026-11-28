@@ -1,5 +1,5 @@
 from pathlib import Path
-import os
+import posixpath
 import tempfile
 import unittest
 
@@ -28,33 +28,20 @@ class StackTemplateTests(unittest.TestCase):
     def test_fetch_and_render_keep_repository_relative_paths(self):
         block = self.tasks[4]["block"]
         fetch = next(task for task in block if task["name"] == "Fetch stack and shared templates")
-        include_directory = next(task for task in block if task["name"] == "Create shared include directories beside stack templates")
-        stage = next(task for task in block if task["name"] == "Stage shared templates beside stack templates")
+        stage = next(task for task in block if task["name"] == "Fetch shared templates beside stack templates")
         source = next(task for task in block if task["name"] == "Render templates")
         self.assertEqual(fetch["loop"], "{{ stack_jinja_all_templates }}")
         self.assertIn("replace(docker_root ~ '/', '', 1)", fetch["ansible.builtin.fetch"]["dest"])
         self.assertIn("replace(docker_root ~ '/', '', 1)", source["ansible.builtin.template"]["src"])
         self.assertEqual(source["loop"], "{{ stack_jinja_templates.files }}")
-        self.assertIn("/templates/", stage["ansible.builtin.copy"]["dest"])
-        self.assertEqual(stage["delegate_to"], "localhost")
         self.assertIn("product(stack_jinja_shared_templates.files", stage["loop"])
+        self.assertEqual(stage["ansible.builtin.fetch"]["flat"], True)
+        self.assertEqual(stage["ansible.builtin.fetch"]["src"], "{{ item.1.path }}")
+        self.assertNotIn("delegate_to", stage)
+        self.assertFalse(any("delegate_to" in task for task in block))
         path_environment = Environment()
-        path_environment.filters["dirname"] = os.path.dirname
-        include_directory_path = path_environment.from_string(
-            include_directory["ansible.builtin.file"]["path"]
-        ).render(
-            stack_jinja_temporary_directory={"path": "/tmp/render"},
-            item=(
-                {"path": "/opt/docker/stacks/development/traefik/compose.yml.j2"},
-                {"path": "/opt/docker/templates/common/logging.yml.j2"},
-            ),
-            docker_root="/opt/docker",
-        )
-        self.assertEqual(
-            include_directory_path,
-            "/tmp/render/stacks/development/traefik/templates/common",
-        )
-        staged_path = path_environment.from_string(stage["ansible.builtin.copy"]["dest"]).render(
+        path_environment.filters["dirname"] = posixpath.dirname
+        staged_path = path_environment.from_string(stage["ansible.builtin.fetch"]["dest"]).render(
             stack_jinja_temporary_directory={"path": "/tmp/render"},
             item=(
                 {"path": "/opt/docker/stacks/development/traefik/compose.yml.j2"},
