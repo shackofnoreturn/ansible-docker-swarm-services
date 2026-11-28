@@ -4,178 +4,276 @@
 - [ ] Set up roles in semaphore
 - [ ] Test all new backup/restore/move roles
 - [ ] Error in semaphore:  
-Task Stack Deploy (Development) added to queue
-Started task #869 of template 'Stack Deploy (Development)'
-
-Preparing: 869
-Updating Repository https://github.com/shackofnoreturn/ansible-docker-swarm-services.git
-From https://github.com/shackofnoreturn/ansible-docker-swarm-services
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Get current commit hash
-Get current commit message
-cloning inventory repository
-Warning: Permanently added 'github.com' (ED25519) to the list of known hosts.
-Updating Repository git@github.com:shackofnoreturn/shackhq-ansible-infrastructure.git
-Warning: Permanently added 'github.com' (ED25519) to the list of known hosts.
-From github.com:shackofnoreturn/shackhq-ansible-infrastructure
- * branch            main       -> FETCH_HEAD
-Already up to date.
-No /tmp/semaphore/project_1/repository_12_template_41/collections/requirements.yml file found. Skip galaxy install process.
-
-/tmp/semaphore/project_1/repository_12_template_41/requirements.yml has no changes. Skip galaxy install process.
-
-No /tmp/semaphore/project_1/repository_12_template_41/collections/requirements.yml file found. Skip galaxy install process.
-
-/tmp/semaphore/project_1/repository_12_template_41/requirements.yml has no changes. Skip galaxy install process.
-
-No /tmp/semaphore/project_1/repository_12_template_41/roles/requirements.yml file found. Skip galaxy install process.
-
-/tmp/semaphore/project_1/repository_12_template_41/requirements.yml has no changes. Skip galaxy install process.
-
-No /tmp/semaphore/project_1/repository_12_template_41/roles/requirements.yml file found. Skip galaxy install process.
-
-/tmp/semaphore/project_1/repository_12_template_41/requirements.yml has no changes. Skip galaxy install process.
-
-
-PLAY [Gather Reachable Nodes] **************************************************
-
-TASK [gather-reachable-hosts : Check SSH reachability] *************************
-ok: [localhost] => (item=shack-app-d001)
-ok: [localhost] => (item=shack-app-d002)
-[ERROR]: Task failed: Module failed: Timeout when waiting for 10.0.0.33:22
-Origin: /tmp/semaphore/project_1/repository_12_template_41/roles/gather-reachable-hosts/tasks/main.yml:2:3
-
-1 ---
-2 - name: Check SSH reachability
-    ^ column 3
-
-failed: [localhost] (item=shack-app-d003) => {"ansible_loop_var": "item", "changed": false, "elapsed": 4, "item": "shack-app-d003", "msg": "Timeout when waiting for 10.0.0.33:22"}
-ok: [localhost] => (item=shack-app-d004)
-...ignoring
-
-TASK [gather-reachable-hosts : Create online group] ****************************
-skipping: [localhost] => (item={'elapsed': 4, 'failed': True, 'msg': 'Timeout when waiting for 10.0.0.33:22', 'invocation': {'module_args': {'host': '10.0.0.33', 'port': 22, 'state': 'started', 'timeout': 3, 'connect_timeout': 5, 'delay': 0, 'active_connection_states': ['ESTABLISHED', 'FIN_WAIT1', 'FIN_WAIT2', 'SYN_RECV', 'SYN_SENT', 'TIME_WAIT'], 'sleep': 1, 'path': None, 'search_regex': None, 'exclude_hosts': None, 'msg': None}}, 'changed': False, 'exception': '(traceback unavailable)', 'item': 'shack-app-d003', 'ansible_loop_var': 'item'}) 
-changed: [localhost] => (item={'state': 'started', 'port': 22, 'search_regex': None, 'match_groups': [], 'match_groupdict': {}, 'path': None, 'elapsed': 0, 'invocation': {'module_args': {'host': '10.0.0.31', 'port': 22, 'state': 'started', 'timeout': 3, 'connect_timeout': 5, 'delay': 0, 'active_connection_states': ['ESTABLISHED', 'FIN_WAIT1', 'FIN_WAIT2', 'SYN_RECV', 'SYN_SENT', 'TIME_WAIT'], 'sleep': 1, 'path': None, 'search_regex': None, 'exclude_hosts': None, 'msg': None}}, 'failed': False, 'changed': False, 'item': 'shack-app-d001', 'ansible_loop_var': 'item'})
-changed: [localhost] => (item={'state': 'started', 'port': 22, 'search_regex': None, 'match_groups': [], 'match_groupdict': {}, 'path': None, 'elapsed': 0, 'invocation': {'module_args': {'host': '10.0.0.32', 'port': 22, 'state': 'started', 'timeout': 3, 'connect_timeout': 5, 'delay': 0, 'active_connection_states': ['ESTABLISHED', 'FIN_WAIT1', 'FIN_WAIT2', 'SYN_RECV', 'SYN_SENT', 'TIME_WAIT'], 'sleep': 1, 'path': None, 'search_regex': None, 'exclude_hosts': None, 'msg': None}}, 'failed': False, 'changed': False, 'item': 'shack-app-d002', 'ansible_loop_var': 'item'})
-changed: [localhost] => (item={'state': 'started', 'port': 22, 'search_regex': None, 'match_groups': [], 'match_groupdict': {}, 'path': None, 'elapsed': 0, 'invocation': {'module_args': {'host': '10.0.0.34', 'port': 22, 'state': 'started', 'timeout': 3, 'connect_timeout': 5, 'delay': 0, 'active_connection_states': ['ESTABLISHED', 'FIN_WAIT1', 'FIN_WAIT2', 'SYN_RECV', 'SYN_SENT', 'TIME_WAIT'], 'sleep': 1, 'path': None, 'search_regex': None, 'exclude_hosts': None, 'msg': None}}, 'failed': False, 'changed': False, 'item': 'shack-app-d004', 'ansible_loop_var': 'item'})
-
-TASK [gather-reachable-hosts : Verify host reachability] ***********************
-skipping: [localhost]
-
-PLAY [Deploy Docker Stack] *****************************************************
-
-TASK [docker-stack-sync : Ensure git installed] ********************************
-ok: [shack-app-d004]
-ok: [shack-app-d002]
-ok: [shack-app-d001]
-
-TASK [docker-stack-sync : Ensure root directory] *******************************
-ok: [shack-app-d004]
-ok: [shack-app-d002]
-ok: [shack-app-d001]
-
-TASK [docker-stack-sync : Set deploy key] **************************************
-ok: [shack-app-d001]
-ok: [shack-app-d002]
-ok: [shack-app-d004]
-
-TASK [docker-stack-sync : Write deploy key] ************************************
-changed: [shack-app-d004]
-changed: [shack-app-d002]
-changed: [shack-app-d001]
-
-TASK [docker-stack-sync : Clone repository] ************************************
-changed: [shack-app-d004]
-changed: [shack-app-d002]
-changed: [shack-app-d001]
-
-TASK [docker-stack-sync : Remove deploy key] ***********************************
-changed: [shack-app-d004]
-changed: [shack-app-d002]
-changed: [shack-app-d001]
-
-TASK [docker-stack-template : Find Jinja templates] ****************************
-ok: [shack-app-d004]
-ok: [shack-app-d002]
-ok: [shack-app-d001]
-
-TASK [docker-stack-template : Create temporary directory] **********************
-changed: [shack-app-d004]
-changed: [shack-app-d002]
-changed: [shack-app-d001]
-
-TASK [docker-stack-template : Fetch stack templates] ***************************
-changed: [shack-app-d004] => (item=/opt/docker/stacks/development/traefik/compose.yml.j2)
-changed: [shack-app-d002] => (item=/opt/docker/stacks/development/traefik/compose.yml.j2)
-changed: [shack-app-d004] => (item=/opt/docker/stacks/development/traefik/configs/traefik/traefik.yml.j2)
-changed: [shack-app-d002] => (item=/opt/docker/stacks/development/traefik/configs/traefik/traefik.yml.j2)
-changed: [shack-app-d001] => (item=/opt/docker/stacks/development/traefik/compose.yml.j2)
-changed: [shack-app-d001] => (item=/opt/docker/stacks/development/traefik/configs/traefik/traefik.yml.j2)
-
+8:21:56 AM
 TASK [docker-stack-template : Render templates] ********************************
-[ERROR]: Task failed: Error rendering template: ../../templates/common/logging.yml.j2
-
+8:21:56 AM
+[ERROR]: Task failed: Error rendering template: 'templates/common/logging.yml.j2' not found in search paths: '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/ansible-stack-template-qkm7_04a/stacks/development/traefik/templates', '/tmp/ansible-stack-template-qkm7_04a/stacks/development/traefik'
+8:21:56 AM
+8:21:56 AM
 Task failed.
-Origin: /tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/main.yml:37:7
-
-35
-36
-37     - name: Render templates
+8:21:56 AM
+Origin: /tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/main.yml:70:7
+8:21:56 AM
+8:21:56 AM
+68
+8:21:56 AM
+69
+8:21:56 AM
+70     - name: Render templates
+8:21:56 AM
          ^ column 7
-
+8:21:56 AM
+8:21:56 AM
 <<< caused by >>>
-
-Error rendering template: ../../templates/common/logging.yml.j2
-Origin: /tmp/ansible-stack-template-fdaoyhdu/0.j2
-
-failed: [shack-app-d002] (item=/opt/docker/stacks/development/traefik/compose.yml.j2) => {"ansible_index_var": "stack_jinja_index", "ansible_loop_var": "item", "changed": false, "item": {"atime": 1795844639.3583293, "ctime": 1795844630.924231, "dev": 64519, "gid": 0, "gr_name": "root", "inode": 655374, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mode": "0644", "mtime": 1795844630.924231, "nlink": 1, "path": "/opt/docker/stacks/development/traefik/compose.yml.j2", "pw_name": "root", "rgrp": true, "roth": true, "rusr": true, "size": 3496, "uid": 0, "wgrp": false, "woth": false, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}, "msg": "Task failed: Error rendering template: ../../templates/common/logging.yml.j2", "stack_jinja_index": 0}
-[ERROR]: Task failed: Error rendering template: ../../templates/common/logging.yml.j2
-
+8:21:56 AM
+8:21:56 AM
+Error rendering template: 'templates/common/logging.yml.j2' not found in search paths: '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/ansible-stack-template-qkm7_04a/stacks/development/traefik/templates', '/tmp/ansible-stack-template-qkm7_04a/stacks/development/traefik'
+8:21:56 AM
+Origin: /tmp/ansible-stack-template-qkm7_04a/stacks/development/traefik/compose.yml.j2
+8:21:56 AM
+8:21:56 AM
+failed: [shack-app-d002] (item=/opt/docker/stacks/development/traefik/compose.yml.j2) => {"ansible_loop_var": "item", "changed": false, "item": {"atime": 1795850459.7286422, "ctime": 1795850459.7296422, "dev": 64519, "gid": 0, "gr_name": "root", "inode": 655374, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mode": "0644", "mtime": 1795850459.7296422, "nlink": 1, "path": "/opt/docker/stacks/development/traefik/compose.yml.j2", "pw_name": "root", "rgrp": true, "roth": true, "rusr": true, "size": 3460, "uid": 0, "wgrp": false, "woth": false, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}, "msg": "Task failed: Error rendering template: 'templates/common/logging.yml.j2' not found in search paths: '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/ansible-stack-template-qkm7_04a/stacks/development/traefik/templates', '/tmp/ansible-stack-template-qkm7_04a/stacks/development/traefik'"}
+8:21:56 AM
+[ERROR]: Task failed: Error rendering template: 'templates/common/logging.yml.j2' not found in search paths: '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/ansible-stack-template-8z74ql0g/stacks/development/traefik/templates', '/tmp/ansible-stack-template-8z74ql0g/stacks/development/traefik'
+8:21:56 AM
+8:21:56 AM
 Task failed.
-Origin: /tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/main.yml:37:7
-
-35
-36
-37     - name: Render templates
+8:21:56 AM
+Origin: /tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/main.yml:70:7
+8:21:56 AM
+8:21:56 AM
+68
+8:21:56 AM
+69
+8:21:56 AM
+70     - name: Render templates
+8:21:56 AM
          ^ column 7
-
+8:21:56 AM
+8:21:56 AM
 <<< caused by >>>
-
-Error rendering template: ../../templates/common/logging.yml.j2
-Origin: /tmp/ansible-stack-template-gudcy5l3/0.j2
-
-failed: [shack-app-d004] (item=/opt/docker/stacks/development/traefik/compose.yml.j2) => {"ansible_index_var": "stack_jinja_index", "ansible_loop_var": "item", "changed": false, "item": {"atime": 1795844639.1953118, "ctime": 1795844630.3232343, "dev": 65024, "gid": 0, "gr_name": "root", "inode": 654582, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mode": "0644", "mtime": 1795844630.3232343, "nlink": 1, "path": "/opt/docker/stacks/development/traefik/compose.yml.j2", "pw_name": "root", "rgrp": true, "roth": true, "rusr": true, "size": 3496, "uid": 0, "wgrp": false, "woth": false, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}, "msg": "Task failed: Error rendering template: ../../templates/common/logging.yml.j2", "stack_jinja_index": 0}
-[ERROR]: Task failed: Error rendering template: ../../templates/common/logging.yml.j2
-
+8:21:56 AM
+8:21:56 AM
+Error rendering template: 'templates/common/logging.yml.j2' not found in search paths: '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/ansible-stack-template-8z74ql0g/stacks/development/traefik/templates', '/tmp/ansible-stack-template-8z74ql0g/stacks/development/traefik'
+8:21:56 AM
+Origin: /tmp/ansible-stack-template-8z74ql0g/stacks/development/traefik/compose.yml.j2
+8:21:56 AM
+8:21:56 AM
+failed: [shack-app-d004] (item=/opt/docker/stacks/development/traefik/compose.yml.j2) => {"ansible_loop_var": "item", "changed": false, "item": {"atime": 1795850459.5912433, "ctime": 1795850459.5912433, "dev": 65024, "gid": 0, "gr_name": "root", "inode": 654582, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mode": "0644", "mtime": 1795850459.5912433, "nlink": 1, "path": "/opt/docker/stacks/development/traefik/compose.yml.j2", "pw_name": "root", "rgrp": true, "roth": true, "rusr": true, "size": 3460, "uid": 0, "wgrp": false, "woth": false, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}, "msg": "Task failed: Error rendering template: 'templates/common/logging.yml.j2' not found in search paths: '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/ansible-stack-template-8z74ql0g/stacks/development/traefik/templates', '/tmp/ansible-stack-template-8z74ql0g/stacks/development/traefik'"}
+8:21:56 AM
+[ERROR]: Task failed: Error rendering template: 'templates/common/logging.yml.j2' not found in search paths: '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/ansible-stack-template-zdiq11w3/stacks/development/traefik/templates', '/tmp/ansible-stack-template-zdiq11w3/stacks/development/traefik'
+8:21:56 AM
+8:21:56 AM
 Task failed.
-Origin: /tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/main.yml:37:7
-
-35
-36
-37     - name: Render templates
+8:21:56 AM
+Origin: /tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/main.yml:70:7
+8:21:56 AM
+8:21:56 AM
+68
+8:21:56 AM
+69
+8:21:56 AM
+70     - name: Render templates
+8:21:56 AM
          ^ column 7
-
+8:21:56 AM
+8:21:56 AM
 <<< caused by >>>
-
-Error rendering template: ../../templates/common/logging.yml.j2
-Origin: /tmp/ansible-stack-template-2myxaq8c/0.j2
-
-failed: [shack-app-d001] (item=/opt/docker/stacks/development/traefik/compose.yml.j2) => {"ansible_index_var": "stack_jinja_index", "ansible_loop_var": "item", "changed": false, "item": {"atime": 1795844640.5060043, "ctime": 1795844633.113912, "dev": 64519, "gid": 0, "gr_name": "root", "inode": 269385, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mode": "0644", "mtime": 1795844633.113912, "nlink": 1, "path": "/opt/docker/stacks/development/traefik/compose.yml.j2", "pw_name": "root", "rgrp": true, "roth": true, "rusr": true, "size": 3496, "uid": 0, "wgrp": false, "woth": false, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}, "msg": "Task failed: Error rendering template: ../../templates/common/logging.yml.j2", "stack_jinja_index": 0}
+8:21:56 AM
+8:21:56 AM
+Error rendering template: 'templates/common/logging.yml.j2' not found in search paths: '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/ansible-stack-template-zdiq11w3/stacks/development/traefik/templates', '/tmp/ansible-stack-template-zdiq11w3/stacks/development/traefik'
+8:21:56 AM
+Origin: /tmp/ansible-stack-template-zdiq11w3/stacks/development/traefik/compose.yml.j2
+8:21:56 AM
+8:21:56 AM
+failed: [shack-app-d001] (item=/opt/docker/stacks/development/traefik/compose.yml.j2) => {"ansible_loop_var": "item", "changed": false, "item": {"atime": 1795850462.7955945, "ctime": 1795850462.7955945, "dev": 64519, "gid": 0, "gr_name": "root", "inode": 269385, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mode": "0644", "mtime": 1795850462.7955945, "nlink": 1, "path": "/opt/docker/stacks/development/traefik/compose.yml.j2", "pw_name": "root", "rgrp": true, "roth": true, "rusr": true, "size": 3460, "uid": 0, "wgrp": false, "woth": false, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}, "msg": "Task failed: Error rendering template: 'templates/common/logging.yml.j2' not found in search paths: '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks/templates', '/tmp/semaphore/project_1/repository_12_template_41/roles/docker-stack-template/tasks', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/semaphore/project_1/repository_12_template_41/templates', '/tmp/semaphore/project_1/repository_12_template_41', '/tmp/ansible-stack-template-zdiq11w3/stacks/development/traefik/templates', '/tmp/ansible-stack-template-zdiq11w3/stacks/development/traefik'"}
+8:21:57 AM
 changed: [shack-app-d004] => (item=/opt/docker/stacks/development/traefik/configs/traefik/traefik.yml.j2)
+8:21:58 AM
 changed: [shack-app-d002] => (item=/opt/docker/stacks/development/traefik/configs/traefik/traefik.yml.j2)
+8:22:00 AM
 changed: [shack-app-d001] => (item=/opt/docker/stacks/development/traefik/configs/traefik/traefik.yml.j2)
-
+8:22:00 AM
+8:22:00 AM
 TASK [docker-stack-template : Remove temporary directory] **********************
-changed: [shack-app-d004]
-changed: [shack-app-d002]
-changed: [shack-app-d001]
+  
+  
+Here is again how the other repo looks like we are deploying stacks from:  
+.
+├── global.yml
+├── README.md
+├── scripts
+│   └── semaphore-run.sh
+├── stacks
+│   ├── development
+│   │   ├── arr-media
+│   │   │   ├── compose.yml
+│   │   │   ├── configs
+│   │   │   ├── README.md
+│   │   │   ├── secrets
+│   │   │   └── stack.yml
+│   │   ├── downloads
+│   │   │   ├── compose.yml.j2
+│   │   │   ├── configs
+│   │   │   ├── README.md
+│   │   │   ├── secrets
+│   │   │   └── stack.yml
+│   │   ├── downloads_
+│   │   │   ├── compose.yml
+│   │   │   ├── configs
+│   │   │   ├── README.md
+│   │   │   ├── secrets
+│   │   │   └── stack.yml
+│   │   ├── files
+│   │   │   ├── compose.yml
+│   │   │   ├── configs
+│   │   │   ├── README.md
+│   │   │   ├── secrets
+│   │   │   └── stack.yml
+│   │   ├── monitoring
+│   │   │   ├── compose.yml
+│   │   │   ├── configs
+│   │   │   │   └── gatus
+│   │   │   │       └── config.yaml.j2
+│   │   │   ├── README.md
+│   │   │   ├── secrets
+│   │   │   └── stack.yml
+│   │   ├── stash
+│   │   │   ├── compose.yml
+│   │   │   ├── configs
+│   │   │   ├── README.md
+│   │   │   ├── secrets
+│   │   │   └── stack.yml
+│   │   └── traefik
+│   │       ├── compose.yml.j2
+│   │       ├── configs
+│   │       │   └── traefik
+│   │       │       ├── dynamic
+│   │       │       │   ├── middlewares.yml
+│   │       │       │   └── proxmox.yml
+│   │       │       └── traefik.yml.j2
+│   │       ├── README.md
+│   │       ├── secrets
+│   │       │   ├── cloudflare_api_token.age
+│   │       │   └── dashboard_users.age
+│   │       └── stack.yml
+│   ├── management
+│   │   ├── monitoring
+│   │   │   ├── compose.yml
+│   │   │   ├── configs
+│   │   │   │   └── gatus
+│   │   │   │       └── config.yaml.j2
+│   │   │   ├── README.md
+│   │   │   ├── secrets
+│   │   │   └── stack.yml
+│   │   └── traefik
+│   │       ├── compose.yml
+│   │       ├── configs
+│   │       │   ├── dynamic
+│   │       │   │   ├── middlewares.yml
+│   │       │   │   └── proxmox.yml
+│   │       │   └── traefik.yml.j2
+│   │       ├── README.md
+│   │       ├── secrets
+│   │       │   ├── cloudflare_api_token.age
+│   │       │   └── dashboard_users.age
+│   │       └── stack.yml
+│   ├── production
+│   │   └── traefik
+│   │       ├── compose.yml
+│   │       ├── configs
+│   │       │   ├── dynamic
+│   │       │   │   ├── middlewares.yml
+│   │       │   │   └── proxmox.yml
+│   │       │   └── traefik.yml.j2
+│   │       ├── README.md
+│   │       ├── secrets
+│   │       │   ├── cloudflare_api_token.age
+│   │       │   └── dashboard_users.age
+│   │       └── stack.yml
+│   ├── README.md
+│   ├── templates
+│   │   ├── common
+│   │   │   └── logging.yml.j2
+│   │   ├── healthchecks
+│   │   │   └── http.yml.j2
+│   │   ├── labels
+│   │   │   ├── homepage.yml.j2
+│   │   │   └── traefik.yml.j2
+│   │   ├── mounts
+│   │   │   └── runtime-config.yml.j2
+│   │   ├── placement
+│   │   │   └── node-label.yml.j2
+│   │   ├── policies
+│   │   │   ├── high.yml.j2
+│   │   │   ├── low.yml.j2
+│   │   │   └── medium.yml.j2
+│   │   └── resources
+│   │       ├── high.yml.j2
+│   │       ├── low.yml.j2
+│   │       └── medium.yml.j2
+│   └── testing
+│       ├── monitoring
+│       │   ├── compose.yml
+│       │   ├── configs
+│       │   │   └── gatus
+│       │   │       └── config.yaml.j2
+│       │   ├── README.md
+│       │   ├── secrets
+│       │   └── stack.yml
+│       ├── stash
+│       │   ├── compose.yml
+│       │   ├── configs
+│       │   ├── README.md
+│       │   ├── secrets
+│       │   └── stack.yml
+│       └── traefik
+│           ├── compose.yml.j2
+│           ├── configs
+│           │   └── traefik
+│           │       ├── dynamic
+│           │       │   ├── middlewares.yml
+│           │       │   └── proxmox.yml
+│           │       └── traefik.yml.j2
+│           ├── README.md
+│           ├── secrets
+│           │   ├── cloudflare_api_token.age
+│           │   └── dashboard_users.age
+│           └── stack.yml
+├── templates
+│   ├── common
+│   │   └── logging.yml.j2
+│   ├── healthchecks
+│   │   └── http.yml.j2
+│   ├── labels
+│   │   ├── homepage.yml.j2
+│   │   └── traefik.yml.j2
+│   ├── mounts
+│   │   └── runtime-config.yml.j2
+│   ├── placement
+│   │   └── node-label.yml.j2
+│   ├── policies
+│   │   ├── high.yml.j2
+│   │   ├── low.yml.j2
+│   │   └── medium.yml.j2
+│   └── resources
+│       ├── high.yml.j2
+│       ├── low.yml.j2
+│       └── medium.yml.j2
+└── templates_BAK
+    ├── common
+    │   └── logging.yml.j2
+    ├── labels
+    │   ├── homepage.yml.j2
+    │   └── traefik.yml.j2
+    ├── policies
+    │   ├── high.yml.j2
+    │   ├── low.yml.j2
+    │   └── medium.yml.j2
+    └── resources
+        ├── high.yml.j2
+        ├── low.yml.j2
+        └── medium.yml.j2
 
-PLAY RECAP *********************************************************************
-localhost                  : ok=2    changed=1    unreachable=0    failed=0    skipped=1    rescued=0    ignored=1   
-shack-app-d001             : ok=10   changed=6    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
-shack-app-d002             : ok=10   changed=6    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
-shack-app-d004             : ok=10   changed=6    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
-
-Failed to run task: exit status 2
-
+76 directories, 99 files  
+  
