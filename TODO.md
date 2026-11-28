@@ -6,6 +6,8 @@
 
 
 
+- [ ] Error again in semaphore:
+
 Here is the entire log of the run I just did:  
 
 Task Stack Deploy (Development) added to queue
